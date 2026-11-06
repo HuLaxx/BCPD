@@ -10,6 +10,9 @@ import {
   Tooltip, XAxis, YAxis
 } from "recharts";
 import { ASSETS, DEFAULT_MARKETS, type Asset } from "@/lib/universe";
+import { PresetStudio } from "@/components/preset-studio";
+import { regimeEvidence } from "@/lib/insights";
+import type { StudyConfig } from "@/lib/presets";
 import {
   analyzeReturns, annualizedVolatility, correlations, logReturns, parseCSV,
   sharedEvents, weeklyCloses, type PricePoint, type Study
@@ -59,11 +62,15 @@ export function ResearchWorkbench() {
   const [failures,setFailures]=useState<Failed[]>([]);
   const [busy,setBusy]=useState(false);
   const [ran,setRan]=useState(false);
+  const [lastRunSignature,setLastRunSignature]=useState("");
   const [focusId,setFocusId]=useState("us");
   const [notice,setNotice]=useState("");
   const uploadRef=useRef<HTMLInputElement>(null);
 
   const focus=studies.find(s=>s.asset.id===focusId)??studies[0];
+  const evidence=useMemo(()=>focus?regimeEvidence(focus):[],[focus]);
+  const signature=JSON.stringify({selected:[...selected].sort(),range,hazard,threshold,overrides:Object.entries(overrides).map(([id,rows])=>[id,rows.length,rows.at(-1)?.date]).sort()});
+  const stale=ran&&lastRunSignature!==signature;
   const relation=useMemo(()=>correlations(studies),[studies]);
   const shifts=useMemo(()=>sharedEvents(studies),[studies]);
   const volatility=useMemo(()=>studies.map(s=>annualizedVolatility(s)),[studies]);
@@ -76,6 +83,12 @@ export function ResearchWorkbench() {
   const toggle=(id:string)=>{
     setSelected(old=>old.includes(id)?old.filter(x=>x!==id):[...old,id]);
   };
+
+  function applyPreset(config:StudyConfig) {
+    setSelected([...config.selected]);setRange(config.range);setHazard(config.hazard);setThreshold(config.threshold);
+    setStudies([]);setFailures([]);setRan(false);setLastRunSignature("");
+    setNotice("Research preset loaded. Run the study to fetch current observations.");
+  }
 
   async function runResearch() {
     if(busy)return;
@@ -109,7 +122,7 @@ export function ResearchWorkbench() {
     }));
     const loaded=results.filter(x=>x.ok).map(x=>x.study);
     const missed=results.filter(x=>!x.ok).map(x=>x.failure);
-    setStudies(loaded);setFailures(missed);setRan(true);setBusy(false);
+    setStudies(loaded);setFailures(missed);setRan(true);setLastRunSignature(signature);setBusy(false);
     if(!loaded.some(s=>s.asset.id===focusId))setFocusId(loaded[0]?.asset.id??"");
     setNotice(loaded.length ? loaded.length+" of "+selected.length+" markets loaded with attributed data." :
       "No provider series loaded. Import an archived date,close CSV to run without external feeds.");
@@ -209,6 +222,9 @@ export function ResearchWorkbench() {
           {failures.length>0&&<div className="failed-list" role="alert">Unavailable sources: {failures.map(f=>f.label+" — "+f.reason).join(" · ")}</div>}
         </section>
 
+        <PresetStudio config={{selected,range:range as StudyConfig["range"],hazard,threshold}} onApply={applyPreset}/>
+        {stale&&<div className="stale-warning" role="status"><CircleAlert size={17}/> Model configuration changed after the last run. Charts below show previous settings until you run research again.</div>}
+
         <section className="summary-row" aria-label="Study metrics">
           <div className="metric-card"><div className="metric-top"><span>MARKETS ANALYZED</span><Globe2 size={19}/></div><strong>{ran?studies.length:"—"}<small>{ran?"/ "+selected.length:""}</small></strong><p>Source-attributed market series</p></div>
           <div className="metric-card"><div className="metric-top"><span>ROBUST CANDIDATES</span><Activity size={19}/></div><strong>{ran?robust:"—"}</strong><p>Agreement in at least 6 of 9 models</p></div>
@@ -237,6 +253,14 @@ export function ResearchWorkbench() {
                 <Line yAxisId="prob" type="monotone" dataKey="probability" name="Reset probability %" stroke="#f4bd7d" dot={false} strokeWidth={2} activeDot={{r:4}}/>
               </ComposedChart></ResponsiveContainer></div>
             <div className="chart-footer"><span><ShieldCheck size={15}/> {focus.source}</span><span>Last close: {focus.latest} · Retrieved {focus.accessedAt.slice(0,10)}</span></div>
+            <div className="evidence-panel"><div className="evidence-heading"><strong>Candidate shift diagnostics</strong><span>8 observed weeks before vs. after · descriptive only</span></div>
+              {evidence.length?<div className="evidence-list">{evidence.map(event=><div className="evidence-item" key={event.date}>
+                <div className="evidence-date"><b>{event.date}</b><span>{event.support}/{event.total} model settings agree</span></div>
+                <div><small>AVG RETURN BEFORE → AFTER</small><strong>{format(event.beforeMeanPct)}% → {format(event.afterMeanPct)}%</strong></div>
+                <div><small>MEAN SHIFT</small><strong className={event.meanShiftPp>=0?"risk-down":"risk-up"}>{event.meanShiftPp>0?"+":""}{format(event.meanShiftPp)} pp</strong></div>
+                <div><small>ANNUALIZED VOLATILITY</small><strong>{format(event.beforeVolatilityPct,1)}% → {format(event.afterVolatilityPct,1)}%</strong></div>
+              </div>)}</div>:<p className="evidence-empty">No candidate met both model agreement and minimum before/after sample requirements. A missing event is not a modeling failure.</p>}
+            </div>
           </>:<EmptyState title="Your next insight starts with evidence" subtitle="Choose a market cohort and run the study to plot actual observed returns and model probabilities."/>}
         </section>
 
