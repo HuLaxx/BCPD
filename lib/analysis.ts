@@ -22,11 +22,14 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const validDate = (s: string): boolean => DATE.test(s) && !Number.isNaN(Date.parse(s+"T00:00:00Z")) &&
   new Date(s+"T00:00:00Z").toISOString().slice(0,10) === s;
 const mean = (x: number[]): number => x.reduce((s,n)=>s+n,0)/x.length;
-const variance = (x: number[]): number => {
-  if(x.length<2) return .0001;
+// Descriptive variance must remain exactly zero for a constant return series.
+const sampleVariance = (x: number[]): number => {
+  if (x.length < 2) return 0;
   const m=mean(x);
-  return Math.max(.0001,x.reduce((s,n)=>s+(n-m)**2,0)/(x.length-1));
+  return Math.max(0,x.reduce((s,n)=>s+(n-m)**2,0)/(x.length-1));
 };
+// The observation noise of a Gaussian likelihood cannot be zero.
+const modelVariance = (x: number[]): number => Math.max(.0001,sampleVariance(x));
 
 export function weeklyCloses(points: PricePoint[]): WeeklyPoint[] {
   const weeks = new Map<string,WeeklyPoint>();
@@ -92,7 +95,7 @@ function peaks(values:number[],threshold:number): number[] {
 export function analyzeReturns(rows:ReturnPoint[],hazard=32,threshold=.2):Analysis {
   if(rows.length<20)throw Error("At least 20 observed weekly returns are required");
   const values=rows.map(x=>x.returnPct);
-  const v=variance(values),priorV=Math.max(.01,v*7);
+  const v=modelVariance(values),priorV=Math.max(.01,v*7);
   const baseline=detect(values,hazard,v,priorV);
   const groups:{center:number; indices:number[]; models:Set<number>}[]=[];
   let model=0;
@@ -132,7 +135,7 @@ export function parseCSV(input:string):PricePoint[] {
 
 export function annualizedVolatility(study:Study,window=12):Volatility {
   const rows=study.returns;const recent=rows.slice(-window),prior=rows.slice(-2*window,-window);
-  const standard=(x:ReturnPoint[])=>Math.sqrt(variance(x.map(r=>r.returnPct))*52);
+  const standard=(x:ReturnPoint[])=>Math.sqrt(sampleVariance(x.map(r=>r.returnPct))*52);
   const current=recent.length===window?standard(recent):null;
   const previous=prior.length===window?standard(prior):null;
   return {id:study.asset.id,label:study.asset.label,annualizedPct:current,

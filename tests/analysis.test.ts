@@ -84,3 +84,10 @@ test("volatility is unavailable with too few observations, never fabricated",()=
   assert.ok(b.annualizedPct!==null&&b.annualizedPct>0);
   assert.ok(b.changePp!==null);
 });
+
+test("flat observed weekly returns have zero descriptive volatility",()=>{
+ const s=study("us",Array(30).fill(0));
+ const vol=annualizedVolatility(s);
+ assert.equal(vol.annualizedPct,0);
+ assert.equal(vol.changePp,0);
+});
