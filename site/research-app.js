@@ -24,11 +24,15 @@ for(const kind of ['index','crypto']){
   const label=document.createElement('label');label.className='asset';
   label.innerHTML=`<input type="checkbox" value="${a.id}" ${selected.has(a.id)?'checked':''}><span>${a.label}</span><small>${a.country}</small>`;
   label.querySelector('input').addEventListener('change',e=>{
-   if(e.target.checked&&selected.size>=5){e.target.checked=false;$('error').textContent='Choose up to five markets per comparison.';return}
+   if(e.target.checked&&selected.size>=14){e.target.checked=false;$('error').textContent='Choose up to 14 markets per comparison.';return}
    if(e.target.checked)selected.add(a.id);else selected.delete(a.id);$('error').textContent='';
   });box.append(label);
  }
 }
+function refreshSelection(){document.querySelectorAll('.asset input').forEach(x=>{x.checked=selected.has(x.value)})}
+$('allIndices').addEventListener('click',()=>{for(const a of assets.filter(a=>a.kind==='index'))selected.add(a.id);refreshSelection()});
+$('allCrypto').addEventListener('click',()=>{for(const a of assets.filter(a=>a.kind==='crypto'))selected.add(a.id);refreshSelection()});
+$('clearSelection').addEventListener('click',()=>{selected.clear();refreshSelection()});
 for(const [input,label,formatter] of [['hazard','hazardLabel',v=>v],['threshold','thresholdLabel',v=>v+'%']])$(input).addEventListener('input',e=>$(label).textContent=formatter(e.target.value));
 const fmt=x=>Number(x).toFixed(2);
 function spark(rows,peaks,accent){
