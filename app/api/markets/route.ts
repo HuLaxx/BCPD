@@ -1,6 +1,7 @@
-import { ALLOWED_RANGES, ASSETS, getHistory } from "../../../api/markets.js";
+import { ALLOWED_RANGES, ASSETS, getHistory } from "../../../lib/market-provider.js";
 
 export const runtime = "nodejs";
+export const maxDuration = 20;
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request): Promise<Response> {
