@@ -24,8 +24,8 @@ export function isStudyConfig(value: unknown): value is StudyConfig {
   if (!value.selected.every(id => typeof id === "string" && available.has(id))) return false;
   if (new Set(value.selected).size !== value.selected.length) return false;
   if (!["1y", "2y", "5y"].includes(String(value.range))) return false;
-  return Number.isInteger(value.hazard) && Number(value.hazard) >= 12 && Number(value.hazard) <= 100 &&
-    Number.isInteger(value.threshold) && Number(value.threshold) >= 5 && Number(value.threshold) <= 80;
+  return typeof value.hazard === "number" && Number.isInteger(value.hazard) && value.hazard >= 12 && value.hazard <= 100 &&
+    typeof value.threshold === "number" && Number.isInteger(value.threshold) && value.threshold >= 5 && value.threshold <= 80;
 }
 export function isStudyPreset(value: unknown): value is StudyPreset {
   if (!isRecord(value)) return false;

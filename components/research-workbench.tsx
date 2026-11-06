@@ -95,7 +95,7 @@ export function ResearchWorkbench() {
     if(!selected.length){setNotice("Select at least one market to run the study.");return}
     setBusy(true);setNotice("Requesting historical observations; no synthetic prices are used.");
     setFailures([]);
-    const results=await Promise.all(selected.map(async id=>{
+    const fetchSelected=async (id:string)=>{
       const asset=ASSETS.find(x=>x.id===id)!;
       try{
         const local=overrides[id];
@@ -118,6 +118,15 @@ export function ResearchWorkbench() {
           latest:points.at(-1)?.date??"Unknown"}} as const;
       }catch(error){
         return {ok:false,failure:{label:asset.label,reason:error instanceof Error?error.message:"Unknown error"}} as const;
+      }
+    };
+    // Limit concurrent upstream requests to reduce provider rate-limits.
+    const results: Awaited<ReturnType<typeof fetchSelected>>[] = new Array(selected.length);
+    let cursor = 0;
+    await Promise.all(Array.from({length:Math.min(3,selected.length)}, async()=>{
+      while(cursor<selected.length){
+        const i=cursor++;
+        results[i]=await fetchSelected(selected[i]);
       }
     }));
     const loaded=results.filter(x=>x.ok).map(x=>x.study);

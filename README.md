@@ -54,3 +54,22 @@ A 20-week return minimum applies before running a model. Market series are align
 - Add accessible, interactive event drill-down and automated visual regression tests.
 
 Built from [HuLaxx/BCPD](https://github.com/HuLaxx/BCPD). This is research software, **not financial advice**.
+
+
+## Workspace functionality (v1.1)
+
+BCPD One can save up to 30 **named research presets** in your browser (market identifiers, history window, hazard and posterior threshold). Apply them to restart a study or export the preset list as JSON. This is **local browser storage**, not cloud synchronization or user accounts. Imported CSV data is deliberately excluded from saved presets and exports.
+
+The research workbench now displays an **eight-observed-week diagnostic** before and after sensitivity-stable change-point candidates, including mean weekly return and annualized sample volatility. An event must have at least six observed weeks on each side to be displayed. These are descriptive differences, not calibrated event significance or trading signals.
+
+The history request pipeline limits concurrent upstream requests to three. The `GET /api/health` endpoint is an application heartbeat; it explicitly does not claim that external market-data providers are healthy.
+
+### Startup roadmap (not implemented)
+
+- Authentication, organization workspaces and permissioned cloud study storage
+- Licensed datasets and scheduled source snapshots, vendor terms and audit trails
+- Real-time notification policies, team review and collaborative research
+- Billing, subscription tiers and multi-tenant limits
+- Independent, genuinely out-of-sample model benchmarks
+
+These items require product and infrastructure decisions; the project does not claim they already work.
