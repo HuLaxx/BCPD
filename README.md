@@ -73,3 +73,13 @@ The history request pipeline limits concurrent upstream requests to three. The `
 - Independent, genuinely out-of-sample model benchmarks
 
 These items require product and infrastructure decisions; the project does not claim they already work.
+
+## Inspect, document and export results
+
+- Select a loaded asset to inspect posterior reset probability, observed returns, and before/after summaries of stable shift candidates.
+- Export a CSV or a **versioned JSON research report** containing market identifiers, observed weekly closes and log returns, model probabilities, source labels, observation times, sensitivity parameters, and candidate peaks.
+- `/methodology` explains the statistical assumptions and why this is retrospective evidence, not a predictive trading system.
+- `/privacy` describes local storage and CSV processing. It does not claim to replace an organization-grade legal privacy policy.
+- `docs/ARCHITECTURE.md` details the build boundary, data/trust model, release checks and unimplemented multi-tenant features.
+
+**Important deployment status:** GitHub Action and Vercel previews still need a successful green build. Do not interpret commits in this branch as a production release.

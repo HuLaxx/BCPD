@@ -61,3 +61,21 @@ a{text-decoration:none;color:inherit}button,input,select{font:inherit}button{cur
 .evidence-empty{font-size:11px;color:#7f9eaf;margin:10px 0;line-height:1.6}
 @media(max-width:900px){.evidence-item{grid-template-columns:1fr 1fr}}
 @media(max-width:650px){.preset-panel{padding:18px 15px}.preset-name-label{width:100%}.preset-controls input{min-width:0;width:100%;flex:auto}.preset-apply{font-size:8px}.evidence-item{grid-template-columns:1fr 1fr;gap:16px}}
+
+/* Product information, privacy, and scientific methodology pages */
+.info-page{min-height:100vh;max-width:1120px;margin:auto;padding:30px 28px 60px}
+.info-nav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 0 23px;border-bottom:1px solid #294457;font:700 10px ui-monospace,monospace;letter-spacing:.09em;color:#9ab7c9}
+.info-nav a:hover,.info-footer a:hover{color:#6fe1cc}.info-nav span{color:#6fc9b6}
+.info-hero{max-width:850px;padding:85px 0 50px}.info-hero h1{font-size:clamp(38px,5.8vw,66px);line-height:1.08;letter-spacing:-.063em;margin:21px 0}.info-hero h1 em{color:#74dfc8;font-style:normal}
+.info-hero>p:not(.section-kicker){font-size:15px;line-height:1.9;color:#a2b9c6;max-width:660px}
+.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.info-card{background:linear-gradient(140deg,#122737,#0e1d2b);border:1px solid #294a59;border-radius:13px;padding:26px}
+.info-card h2{font-size:17px;letter-spacing:-.025em;color:#d6f0ed;margin:0 0 13px}
+.info-card p{font-size:12px;line-height:1.85;color:#9ab5c1;margin:0}
+.info-banner{background:linear-gradient(110deg,#19413f,#102937);border:1px solid #3a7970;padding:31px;border-radius:14px;margin-top:26px}
+.info-banner h2{font-size:22px;letter-spacing:-.035em;margin:0 0 11px}.info-banner p{font-size:12px;line-height:1.9;color:#b5d0ce;max-width:790px}
+.info-banner a,.info-back{display:inline-block;margin-top:15px;border:1px solid #83d6c5;border-radius:7px;color:#092c32;background:#81d9c7;font:800 10px ui-monospace,monospace;padding:12px 17px;letter-spacing:.08em}
+.info-footer{display:flex;align-items:center;gap:25px;margin-top:32px;border-top:1px solid #294457;padding-top:21px;color:#88a8b7;font:700 10px ui-monospace,monospace}
+.inline-link{color:#9ce9d6;text-decoration:underline;text-underline-offset:3px}
+.workspace-footer a:hover{color:#9ce9d6}
+@media(max-width:650px){.info-page{padding:18px 14px 35px}.info-nav{font-size:8px}.info-hero{padding:55px 0 35px}.info-grid{grid-template-columns:1fr}.info-card{padding:22px}.info-banner{padding:23px}.info-hero>p:not(.section-kicker){font-size:13px}}
