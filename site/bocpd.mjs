@@ -42,6 +42,6 @@ export function sample(){
 }
 export function peaks(prob,threshold=.25){
  let out=[];
- for(let i=2;i<prob.length-2;i++)if(prob[i]>=threshold&&prob[i]>prob[i-1]&&prob[i]>=prob[i+1]&&!out.some(j=>i-j<8))out.push(i);
+ for(let i=2;i<prob.length-1;i++)if(prob[i]>=threshold&&prob[i]>prob[i-1]&&prob[i]>=prob[i+1]&&!out.some(j=>i-j<6))out.push(i);
  return out;
 }
