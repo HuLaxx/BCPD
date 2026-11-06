@@ -1,17 +1,21 @@
-name: BCPD MSc Research Tests
+name: BCPD One / Quality Gates
 on:
   push:
-    branches: [main]
+    branches: [main, feat/bcpd-one-nextjs]
   pull_request:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  model-tests:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test tests/*.test.mjs
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build
