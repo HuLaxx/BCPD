@@ -1,4 +1,4 @@
-name: BCPD model tests
+name: BCPD MSc Research Tests
 on:
   push:
     branches: [main]
@@ -7,12 +7,11 @@ on:
 permissions:
   contents: read
 jobs:
-  test:
+  model-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-      - name: Run Bayesian inference regression tests
-        run: node --test tests/bocpd.test.mjs
+          node-version: '22'
+      - run: node --test tests/*.test.mjs

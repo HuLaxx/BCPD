@@ -3,5 +3,21 @@
   "framework": null,
   "buildCommand": null,
   "installCommand": "",
-  "outputDirectory": "site"
+  "outputDirectory": "site",
+  "functions": {
+    "api/markets.js": {
+      "maxDuration": 20
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    }
+  ]
 }
