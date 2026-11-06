@@ -1,47 +1,56 @@
-# BCPD · MSc Research Atlas
+# BCPD One — Regime Intelligence
 
-**Bayesian Change-Point Detection across global equity indices and cryptocurrencies** — a functioning interactive research application by Rahul Khanke. This site is a presentation and exploration of the user's MSc Data Science research theme, not a reproduction of dissertation data or reported results. Raw dissertation sources and ground-truth benchmark figures were not available for verification.
+Research-grade Bayesian change-point exploration across nine national equity indices and a selected five-cryptocurrency cohort.
 
-## Run the application
+## Architecture
 
-The root page is now the **Global Markets Research Atlas**, comparing nine national market indices and a fixed five-cryptocurrency research cohort. The original [single-series Bayesian lab](site/lab.html) is preserved at `/lab.html`.
+- **Next.js App Router / React / TypeScript**: a production-oriented modular application.
+- **Tailwind CSS v4 + bespoke dark design system**: responsive research workspace.
+- **Recharts**: interactive observed weekly log returns and posterior reset probabilities.
+- **TypeScript research domain** in `lib/analysis.ts`: Gaussian mean-shift BOCPD, nine-setting hazard/noise sensitivity, sample volatility, pairwise correlations and shared shift-event clustering.
+- **Node.js route handler** at `/api/markets`: source-attributed historical chart responses from the existing whitelisted Yahoo Finance adapter, with optional one-year CoinGecko Demo fallback.
+- **Classic Bayesian laboratory** preserved at `/lab.html` and original research implementation retained in `site/` for reproducibility.
+- **CI checks**: original numerical tests, new TypeScript research tests, type checking, linting and Next.js production build.
 
-Features:
-- Source-attributed live-request historical price data through a serverless `/api/markets` endpoint: Yahoo Finance's **unofficial** chart API, and an optional CoinGecko Demo fallback for 1-year crypto series if `COINGECKO_DEMO_API_KEY` is supplied.
-- Series included: S&P 500, FTSE 100, DAX, CAC 40, Nikkei 225, Hang Seng, Nifty 50, ASX 200, TSX Composite; Bitcoin, Ethereum, XRP, BNB and Solana. **Crypto is a fixed selected cohort—not a verified live capitalization ranking.**
-- Align prices to *Sunday–Saturday UTC weeks* using each market's last actually observed close; stock exchange holidays/weekends are never forward-filled.
-- Compare **weekly percentage log returns** instead of mixing unscaled raw national index levels with cryptocurrency dollar prices.
-- Bayesian online change-point detection, a Gaussian mean-shift model with **fixed variance estimated from the full sample**. This is a retrospective analysis, not a leakage-free real-time trading signal.
-- Nine-model parameter sensitivity grid (three hazard settings × three noise-variance scales), candidate overlap across markets, and export of observed dates, baseline probabilities and data provenance.
-- **Source outage fallback**: import your own `date,close` CSV for any market. Uploaded CSVs remain client-side, and are labeled as user data rather than silently substituted for API results.
+### Run locally
 
-### Data-source decision
-
-Yahoo Finance is convenient for exploratory historical national indices, but its chart endpoint is **unofficial**, may rate limit requests and does not represent licensed feeds. CoinGecko has documented crypto market APIs but free/demo plans have history and quota restrictions. For a dissertation-grade replication, use archived, traceable downloads from licensed or authorized vendors (e.g., an institutional Refinitiv/LSEG/Bloomberg subscription, official exchange data where permitted, or carefully cited datasets). Record asset identifiers, adjustments, dates, currencies, provider, retrieval time, time zone and terms. The dashboard deliberately shows failures and fallback status rather than fabricating market prices.
-
-### Important research interpretation
-
-This interface measures **parameter agreement**, not verified predictive accuracy, reliability of market price feeds, or an academically validated cross-country robustness score. At each event the model tests whether the posterior reset peak persists under nearby parameter settings. As its variance estimate uses the full sample, it should not be characterized as a strictly online out-of-sample predictor. Confirmed conclusions require your original dissertation methodology, evaluation criteria and archived datasets; we have not invented those.
-
-## Develop & test
+Requires Node.js 20.9 or newer, with package registry access.
 
 ```bash
-npm test                 # no dependencies to install, Node.js 20+
-python -m http.server 4173 --directory site
+npm install
+npm run dev
+# visit http://localhost:3000
 ```
 
-The local Python static server runs UI and the original single-series lab, **not the market serverless function**. For live market data, deploy through Vercel or run Vercel's development environment. CSV fallback works without any external provider.
+```bash
+npm run verify
+```
 
-In Vercel, the `api/markets.js` route runs server-side. Optionally set `COINGECKO_DEMO_API_KEY` in Vercel environment variables for 1-year crypto fallback. Do not put provider secrets in client-side code.
+### Working workflow
 
-## Deployment and scientific follow-up
+1. Select one or more indices or cryptoassets, date range and BOCPD settings.
+2. Run the study: the app requests observed historical closing prices and independently reports failed providers.
+3. Examine posterior reset probabilities, sensitivity-stable candidate breaks, pairwise return correlations, trailing annualized volatility and temporal clusters of shared peaks.
+4. Export an attributed CSV for reproducibility.
+5. When a provider cannot supply data, upload a local `date,close` CSV. The local override never leaves the browser.
 
-- [x] Full interactive app with country indices, five-coin cohort, weekly harmonization and model sensitivity.
-- [x] Original single-series lab preserved and test suites added.
-- [x] Serverless source-attributed Yahoo chart adapter, optional CoinGecko fallback and user CSV import.
-- [ ] Re-run analysis against verified archival dissertation datasets and label actual coursework results.
-- [ ] Add split-sample evaluation and benchmark methods before claiming predictive accuracy.
-- [ ] Confirm provider availability from the production Vercel region and add monitoring.
-- [ ] Review research reproducibility, provider data licensing and any institution rules before publishing full dissertation input data.
+A 20-week return minimum applies before running a model. Market series are aligned to Sunday–Saturday UTC weeks using the last **observed** close, with no synthetic weekend fills.
 
-**Built by Rahul Khanke / HuLaX** · University of Glasgow, MSc Data Science (2025).
+### Data and methodological limitations
+
+- Yahoo Finance chart data is an **unofficial** and potentially rate-limited data source, not a licensed feed. CoinGecko fallback requires `COINGECKO_DEMO_API_KEY` on the server and is limited to a one-year crypto window.
+- The cohort of five cryptoassets is fixed for research; it is not a current capitalization ranking.
+- Posterior reset probabilities are model conditional, not calibrated certainty about real-world events. Sensitivity agreement across 9 settings is **not** predictive accuracy.
+- The model estimates fixed observation variance using the entire return series and estimates its prior mean from the first observations, making the current study **retrospective** rather than leakage-free real-time prediction.
+- Pairwise correlation uses only common dated weekly returns and is not causal; annualized historical volatility is not a risk forecast.
+- The user’s original dissertation source data and verified assessment metrics are not present here. Nothing is represented as replicated dissertation findings.
+- The source adapter's rate limits and network availability depend on where Vercel runs. Users should validate data provenance before any academic publication.
+
+## Production follow-up
+
+- Archive verified source snapshots and methodology-specific benchmark datasets.
+- Introduce walk-forward evaluation and alternate change-point models.
+- Add provider health monitoring, caching policy reviews and operational error budgets.
+- Add accessible, interactive event drill-down and automated visual regression tests.
+
+Built from [HuLaxx/BCPD](https://github.com/HuLaxx/BCPD). This is research software, **not financial advice**.
