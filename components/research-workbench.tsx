@@ -12,6 +12,7 @@ import {
 import { ASSETS, DEFAULT_MARKETS, type Asset } from "@/lib/universe";
 import { PresetStudio } from "@/components/preset-studio";
 import { regimeEvidence } from "@/lib/insights";
+import { createResearchReport } from "@/lib/report";
 import type { StudyConfig } from "@/lib/presets";
 import {
   analyzeReturns, annualizedVolatility, correlations, logReturns, parseCSV,
@@ -36,6 +37,13 @@ function ResearchTag({children}: {children: React.ReactNode}) {
 function EmptyState({title,subtitle}: {title:string;subtitle:string}) {
   return <div className="empty-state"><div className="empty-orbit"><Activity size={26}/></div>
     <h3>{title}</h3><p>{subtitle}</p></div>;
+}
+
+function reportDownload(studies: Study[], config: StudyConfig) {
+  const report=createResearchReport(studies,config,new Date().toISOString());
+  const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:"application/json"}));
+  const link=document.createElement("a");link.href=url;link.download="bcpd-one-research-report.json";link.click();
+  window.setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 function csvDownload(studies: Study[]) {
@@ -246,7 +254,8 @@ export function ResearchWorkbench() {
             <p>Weekly log returns and Bayesian posterior reset probabilities. Both series use separate axes.</p></div>
             <div className="chart-actions">{studies.length>0&&<><select aria-label="Market in chart" value={focus?.asset.id??""} onChange={e=>setFocusId(e.target.value)}>
               {studies.map(s=><option key={s.asset.id} value={s.asset.id}>{s.asset.label}</option>)}</select>
-              <button className="outline-btn" onClick={()=>csvDownload(studies)}><ArrowDownToLine size={16}/> EXPORT CSV</button></>}</div></div>
+              <button className="outline-btn" onClick={()=>csvDownload(studies)}><ArrowDownToLine size={16}/> EXPORT CSV</button>
+              <button className="outline-btn" onClick={()=>reportDownload(studies,{selected,range:range as StudyConfig["range"],hazard,threshold})}><ArrowDownToLine size={16}/> RESEARCH REPORT</button></>}</div></div>
           {focus?<><div className="chart-legend"><span><i className="legend-bars"/> WEEKLY LOG RETURN (%)</span><span><i className="legend-line"/> CHANGE PROBABILITY (%)</span><span className="legend-right">{focus.returns.length} weekly observations</span></div>
             <div className="chart-container"><ResponsiveContainer width="100%" height={315}>
               <ComposedChart data={chart} margin={{top:14,right:12,bottom:2,left:0}}>
@@ -298,10 +307,10 @@ export function ResearchWorkbench() {
         </section>
 
         <section className="methodology-strip"><div className="method-icon"><ShieldCheck size={22}/></div><div><strong>Scientific clarity is a feature, not a footnote.</strong>
-          <p>The Gaussian mean-shift BOCPD model uses whole-sample variance and a first-observation prior. Results are retrospective; nine-setting sensitivity is parameter agreement, not prediction confidence. Yahoo Finance is an unofficial historical source, and free APIs may fail. Imported files are processed client-side.</p></div>
+          <p>The Gaussian mean-shift BOCPD model uses whole-sample variance and a first-observation prior. Results are retrospective; nine-setting sensitivity is parameter agreement, not prediction confidence. Yahoo Finance is an unofficial historical source, and free APIs may fail. Imported files are processed client-side. <a className="inline-link" href="/methodology">Read the full methodology.</a></p></div>
           <a href="https://github.com/HuLaxx/BCPD" target="_blank" rel="noopener noreferrer">REPRODUCIBLE SOURCE <ArrowRight size={17}/></a></section>
       </main>
-      <footer className="workspace-footer"><span>© BCPD ONE · BAYESIAN CHANGE-POINT RESEARCH</span><span>BUILT FOR INVESTIGATION. NOT FOR INVESTMENT ADVICE.</span></footer>
+      <footer className="workspace-footer"><span>© BCPD ONE · BAYESIAN CHANGE-POINT RESEARCH</span><span><a href="/methodology">METHODOLOGY</a> · <a href="/privacy">PRIVACY</a> · NOT INVESTMENT ADVICE</span></footer>
     </div>
   </div>;
 }
