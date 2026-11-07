@@ -12,13 +12,18 @@ concurrency:
   cancel-in-progress: true
 jobs:
   python-protocol:
+    name: Python deterministic tests (${{ matrix.python-version }})
     runs-on: ubuntu-latest
     timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
       - name: Test independent Python research protocol
         run: python -m unittest discover -s research/tests -v
 
@@ -52,7 +57,7 @@ jobs:
 
   five-year-daily-smoke:
     name: Five-year walk-forward source diagnostic (NON-GATING)
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     continue-on-error: true

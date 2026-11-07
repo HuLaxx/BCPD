@@ -112,3 +112,16 @@ python -m research.observed_cohort --fetch --assets us btc in --out artifacts/ob
 ```
 
 The output provides calibrated thresholds, exact UTC alert week-ends, daily source CSV SHA-256, alarm counts and held-out alarm rates. It explicitly omits precision, recall and F1 when no independently labeled events exist. For dataset rights and comparative evidence see [OBSERVED_MARKET_EVALUATION.md](OBSERVED_MARKET_EVALUATION.md).
+
+## Five-year daily walk-forward milestone
+
+The research-only `research/five_year_source.py` supports a deliberately allowlisted 5-year **daily**, not weekly, source path for S&P 500, Bitcoin and Nifty 50. It is **not** the deployed application's five-year endpoint and does not modify the production dashboard.
+
+```bash
+python -m research.five_year_source --asset us --out-dir local-data
+python -m research.five_year_source --asset btc --out-dir local-data
+python -m research.five_year_source --asset in --out-dir local-data
+python -m research.walkforward_cohort --snapshot-dir local-data --out artifacts/five-year-cohort.json
+```
+
+The latest GitHub Actions diagnostic confirmed **259 weekly returns and four non-overlapping 26-week held-out folds** on each of three unofficial market histories, with descriptive fold-bootstrap alarm-count intervals. This is an observed-data **alarm-volume** milestone, not scientific event accuracy. See [FIVE_YEAR_WALKFORWARD.md](FIVE_YEAR_WALKFORWARD.md) for the detailed table, source hashes and limitations. For future verified target labels, see [EVENT_ANNOTATION_PROTOCOL.md](EVENT_ANNOTATION_PROTOCOL.md). The external source smoke job is manually triggered rather than part of routine PR CI.

@@ -46,7 +46,7 @@
 | Independent Python model | Gaussian/Normal online BOCPD prototype exists; custom code and synthetic tests | Original dissertation parity unknown |
 | Event scoring | Replaced greedy matching with causal max-cardinality/min-delay dynamic programming and new brute-force regression cases | Focused local regression passed; complete latest branch CI still red |
 | Calibration | Train-only alert-budget selection; hard failure when the common calibration limit cannot be met; continuous state across test boundary | Implemented; full branch CI not yet verified |
-| CI workflows | Latest runner jobs show failure with no executed steps | **Blocked; do not approve** |
+| CI workflows | GitHub runners now execute. 46 Python tests passed on 2026-11-07; Next.js quality checks have passed on prior research commits | **Engineering gates reactivated; scientific review remains open** |
 | Production | Research PR is draft, not merged; BCPD One main remains unchanged | Live website does **not** include this research upgrade |
 
 ## Required accountable signoff
@@ -54,3 +54,7 @@
 A release note must record: exact commit SHA, source dataset hashes, Python/Node versions, an independently reproduced model/baseline audit, CI run URLs, Vercel preview URL, known limitations, a rollback commit, and explicit approval by the project owner. No checklist item may be marked complete solely because a feature was committed.
 
 This document is a **gate**, not a marketing promise of perfection. No software/model can be guaranteed defect-free; the goal is to eliminate unexamined claims and prevent known unresolved critical risks from reaching production.
+
+## Five-year walk-forward evidence update
+
+The [five-year research diagnostic](FIVE_YEAR_WALKFORWARD.md) successfully retrieved actual daily historical observations for the S&P 500, Bitcoin and Nifty 50, then ran the 3-detector Python protocol across **four disjoint 26-week held-out periods per market** (259 weekly returns per asset). The complete test suite passed **46 Python tests** on the corrected commit, and historical data remain excluded from public Git. This satisfies an *engineering demonstration of chronological evaluation*, but does **not** satisfy independent source licensing, complete event-label review, model superiority or publication-quality uncertainty. These release gates remain unchecked.
