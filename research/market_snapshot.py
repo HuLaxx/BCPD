@@ -29,8 +29,8 @@ RANGES = frozenset(("1y", "2y"))
 
 
 def parse_daily_payload(payload: object, asset: str, history_range: str) -> dict:
-    if asset not in SUPPORTED or history_range not in RANGES:
-        raise ValueError("Only whitelisted markets and 1y or 2y daily histories are permitted")
+    if asset not in SUPPORTED or history_range not in RANGES | {"5y"}:
+        raise ValueError("Only allowlisted markets and daily 1y, 2y or independent 5y histories are permitted")
     if not isinstance(payload, dict) or not isinstance(payload.get("asset"), dict):
         raise ValueError("Invalid market provider response")
     if payload["asset"].get("id") != asset or payload.get("range") != history_range:
@@ -84,7 +84,8 @@ def save_snapshot(parsed: dict, directory: Path) -> tuple[Path, Path]:
         "market_name": parsed["name"],
         "range": parsed["range"],
         "source": parsed["source"],
-        "source_url": BASE_URL + "/api/markets?asset=" + parsed["asset"] + "&range=" + parsed["range"],
+        "source_url": parsed.get("source_url", BASE_URL + "/api/markets?asset=" + parsed["asset"] + "&range=" + parsed["range"]),
+        "price_basis": parsed.get("price_basis", "Provider close, adjustment policy not independently verified"),
         "interval": parsed["interval"],
         "provider_accessed_at": parsed["provider_accessed_at"],
         "snapshot_captured_at": datetime.now(timezone.utc).isoformat(),
@@ -101,7 +102,7 @@ def save_snapshot(parsed: dict, directory: Path) -> tuple[Path, Path]:
 
 def download(asset: str, history_range: str = "2y", out_dir: Path = Path("local-data")) -> tuple[Path, Path]:
     if asset not in SUPPORTED or history_range not in RANGES:
-        raise ValueError("Unsupported market or range")
+        raise ValueError("The deployed app can supply daily data only for 1y and 2y; use research.five_year_source for five-year daily data")
     url = BASE_URL + "/api/markets?asset=" + asset + "&range=" + history_range
     request = Request(url, headers={"User-Agent": "BCPD-One-Research-Validation/1.0", "Accept": "application/json"})
     with urlopen(request, timeout=25) as response:
