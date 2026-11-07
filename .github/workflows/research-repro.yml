@@ -1,0 +1,105 @@
+name: Dissertation reproduction protocol
+on:
+  pull_request:
+    paths:
+      - 'research/**'
+      - '.github/workflows/research-repro.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: research-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  python-protocol:
+    name: Python deterministic tests (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Test independent Python research protocol
+        run: python -m unittest discover -s research/tests -v
+
+  observed-market-smoke:
+    name: Observed market alarm comparison (NON-GATING)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compare 3 detectors on real, unofficial historical observations
+        run: |
+          python -m research.observed_cohort --fetch --assets us btc in --out /tmp/bcpd-observed-cohort.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          j=json.loads(Path("/tmp/bcpd-observed-cohort.json").read_text())
+          assert j["accuracy_verified"] is False
+          assert len(j["markets"]) == 3
+          print("Observed historical input diagnostic complete. No verified event labels or accuracy scores.")
+          for market in j["markets"]:
+              print(market["asset"], "source:", market["provider"], "csv SHA256:", market["daily_close_sha256"],
+                    "frozen through:", market["finalized_week_cutoff"])
+          PY
+      # No raw third-party prices are uploaded as public workflow artifacts.
+      # This optional provider-dependent job is not a release gate.
+
+  five-year-daily-smoke:
+    name: Five-year walk-forward source diagnostic (NON-GATING)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Attempt allowlisted five-year daily source and walk-forward research
+        run: |
+          python -m research.walkforward_cohort --fetch --assets us btc in --out /tmp/bcpd-5y-summary.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path("/tmp/bcpd-5y-summary.json").read_text())
+          assert report["model_accuracy_verified"] is False
+          assert len(report["markets"]) == 3
+          assert all(row["fold_count"] >= 3 for row in report["markets"])
+          print("Five-year daily input and expanding walk-forward checks completed.")
+          print("No event accuracy or superiority claims are made.")
+          PY
+      # Provider-dependent and explicitly NON-GATING. No third-party raw prices
+      # are uploaded as artifacts. Revert this job to manual-only after audit.
+
+  synthetic-signal-quality:
+    name: Seeded signal quality & negative controls (SYNTHETIC ONLY)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Evaluate 20 seeded scenarios per type without market data
+        run: |
+          python -m research.signal_quality_probe --seeds 20 --out /tmp/bcpd-synthetic-signal-quality.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result=json.loads(Path("/tmp/bcpd-synthetic-signal-quality.json").read_text())
+          assert result["verified_real_market_accuracy"] is False
+          assert result["not_a_scientific_superiority_claim"] is True
+          assert result["seeds"] == 20
+          print("SYNTHETIC ONLY, not verified financial market event accuracy.")
+          PY

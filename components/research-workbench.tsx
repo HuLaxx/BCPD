@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   Activity, ArrowDownToLine, ArrowRight, BarChart3, BookOpen, Check, CircleAlert,
   Database, FileUp, GitBranch, Globe2, Layers3, RefreshCw, ShieldCheck, SlidersHorizontal, Waves
@@ -165,10 +166,10 @@ export function ResearchWorkbench() {
 
   return <div className="app-frame">
     <aside className="nav-rail">
-      <a href="/" className="logo-lockup" aria-label="BCPD One home">
+      <Link href="/" className="logo-lockup" aria-label="BCPD One home">
         <span className="logo-mark"><Waves size={23} strokeWidth={2.4}/></span>
         <span className="logo-wordmark">BCPD <b>ONE</b><small>RESEARCH INTELLIGENCE</small></span>
-      </a>
+      </Link>
       <div className="nav-caption">WORKSPACE</div>
       <nav className="primary-nav" aria-label="Main navigation">
         <a className="nav-active" href="#overview"><BarChart3 size={17}/> Research overview</a>
