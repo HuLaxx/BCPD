@@ -97,28 +97,66 @@ def read_event_labels(path: Path) -> list[tuple[str, str]]:
 
 
 def event_metrics(alerts: list[int], events: list[int], tolerance_weeks: int = 2) -> dict:
-    """Credit only alerts on/after an event, within tolerance. One-to-one."""
-    if tolerance_weeks < 0 or tolerance_weeks > 12:
-        raise ValueError("tolerance must be between 0 and 12")
-    pairs = sorted(((a - e, a, e) for a in alerts for e in events
-                    if 0 <= a - e <= tolerance_weeks))
-    used_alerts, used_events, delays = set(), set(), []
-    for _, a, e in pairs:
-        if a not in used_alerts and e not in used_events:
-            used_alerts.add(a)
-            used_events.add(e)
-            delays.append(a - e)
+    """Causal maximum-cardinality, minimum-delay, one-to-one event matching.
+
+    An alert is eligible only at or AFTER the event, within the declared
+    detection window. The dynamic program maximizes matched events first and
+    minimizes total detection delay second. This avoids greedy pairing errors
+    that incorrectly undercount true positives for adjacent events.
+    """
+    if not isinstance(tolerance_weeks, int) or not 0 <= tolerance_weeks <= 12:
+        raise ValueError("tolerance must be an integer between 0 and 12")
+    if any(not isinstance(i, int) or isinstance(i, bool) or i < 0 for i in alerts + events):
+        raise ValueError("alert/event indices must be nonnegative integers")
+    if alerts != sorted(set(alerts)) or events != sorted(set(events)):
+        raise ValueError("alerts and events must be unique and sorted")
+
+    na, ne = len(alerts), len(events)
+    # (matched events, aggregate delay): prefer more matches, then less delay.
+    scores = [[(0, 0) for _ in range(ne + 1)] for _ in range(na + 1)]
+    decisions = [["" for _ in range(ne + 1)] for _ in range(na + 1)]
+
+    def better(candidate: tuple[int, int], current: tuple[int, int]) -> bool:
+        return (candidate[0], -candidate[1]) > (current[0], -current[1])
+
+    for i in range(na - 1, -1, -1):
+        for j in range(ne - 1, -1, -1):
+            best = scores[i + 1][j]
+            choice = "skip_alert"
+            if better(scores[i][j + 1], best):
+                best = scores[i][j + 1]
+                choice = "skip_event"
+            delay = alerts[i] - events[j]
+            if 0 <= delay <= tolerance_weeks:
+                matches, cost = scores[i + 1][j + 1]
+                candidate = (matches + 1, cost + delay)
+                if better(candidate, best):
+                    best, choice = candidate, "match"
+            scores[i][j] = best
+            decisions[i][j] = choice
+
+    delays = []
+    i = j = 0
+    while i < na and j < ne:
+        choice = decisions[i][j]
+        if choice == "match":
+            delays.append(alerts[i] - events[j])
+            i += 1
+            j += 1
+        elif choice == "skip_event":
+            j += 1
+        else:
+            i += 1
     tp = len(delays)
-    precision = tp / len(alerts) if alerts else 0.0
-    recall = tp / len(events) if events else None
+    precision = tp / na if na else 0.0
+    recall = tp / ne if ne else None
     f1 = (None if recall is None else
           2 * precision * recall / (precision + recall) if precision + recall else 0.0)
-    return {"alerts": len(alerts), "events": len(events), "matched": tp,
+    return {"alerts": na, "events": ne, "matched": tp,
             "precision": precision, "recall": recall, "f1": f1,
-            "false_alarms": len(alerts) - tp,
+            "false_alarms": na - tp,
             "signed_detection_delay_weeks": delays,
-            "mean_absolute_delay_weeks": (sum(abs(d) for d in delays) / tp if tp else None)}
-
+            "mean_absolute_delay_weeks": (sum(delays) / tp if tp else None)}
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
