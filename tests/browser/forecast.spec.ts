@@ -39,7 +39,7 @@ test("forecast lab fails visibly when provider history is missing",async({page})
       body:JSON.stringify({error:"Synthetic provider outage."})});
   });
   await page.goto("/forecast");
-  await expect(page.getByRole("alert")).toContainText("Synthetic provider outage.");
+  await expect(page.locator(".fc-empty[role=alert]")).toContainText("Synthetic provider outage.");
   await expect(page.getByRole("button",{name:/RETRY SOURCE/})).toBeVisible();
   await expect(page.getByRole("button",{name:/EXPORT RESEARCH/})).toBeDisabled();
 });
