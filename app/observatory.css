@@ -357,3 +357,109 @@
   .ob-eyebrow{flex-wrap:wrap}
   .ob-intro-actions .ob-button{white-space:normal;text-align:center;line-height:1.45}
 }
+
+
+/* HuLaX project-family identity
+   Adapted from the existing Shiftify/Sentinance header credit and floating footer,
+   using Observatory palette and retaining the BCPD research trust language. */
+.hlx-credit{display:inline-flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:2px;min-width:70px;line-height:1.05;text-decoration:none!important;white-space:nowrap}
+.hlx-credit-overline{font:750 8px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.10em;color:#95aa9a;transition:color .2s}
+.hlx-credit-name{display:inline-flex;align-items:center;gap:4px;font:800 15px/1.05 ui-sans-serif,system-ui,sans-serif;letter-spacing:-.045em;color:#d8eab4;transition:color .2s,filter .2s}
+.hlx-credit-name svg{opacity:.54;transition:transform .2s}
+.hlx-credit:hover .hlx-credit-overline,.hlx-credit:focus-visible .hlx-credit-overline{color:#d0dfc7}
+.hlx-credit:hover .hlx-credit-name,.hlx-credit:focus-visible .hlx-credit-name{background:linear-gradient(95deg,#85c5ff,#d8b4ff 47%,#ffcf8e);background-clip:text;color:transparent;filter:drop-shadow(0 0 13px #92bae34c)}
+.hlx-credit:hover .hlx-credit-name svg,.hlx-credit:focus-visible .hlx-credit-name svg{transform:translate(2px,-2px)}
+.hlx-credit:focus-visible,.hlx-footer a:focus-visible{outline:2px solid #d1eaa0;outline-offset:4px;border-radius:3px}
+.ob-topbar-identity{display:flex;align-items:center;gap:17px;min-width:0}
+.ob-topbar-credit-divider{height:27px;width:1px;background:#42594a;flex:none}
+.ob-header-small-label{display:none}
+.ob-topbar .hlx-credit{flex:none}
+
+.hlx-footer{padding:36px clamp(18px,3.4vw,55px) 45px;background:#0b1517;position:relative;z-index:1;color:#e5eddc}
+.hlx-footer-panel{border:1px solid #35473d;background:radial-gradient(ellipse at 14% 4%,#283d31 0%,transparent 44%),linear-gradient(145deg,#142421,#0d191b 70%);border-radius:25px;box-shadow:0 30px 85px #00000042;overflow:hidden;max-width:1760px;margin:0 auto}
+.hlx-footer-main{display:grid;grid-template-columns:minmax(0,2fr) minmax(160px,1fr) minmax(160px,1fr);gap:clamp(26px,4vw,92px);padding:clamp(33px,5vw,75px) clamp(27px,5vw,83px) clamp(33px,4vw,65px)}
+.hlx-footer-wordmark{display:inline-flex;align-items:center;gap:13px;color:#f0f3e8!important;text-decoration:none!important;font-size:clamp(21px,2vw,30px);font-weight:850;letter-spacing:-.078em;line-height:.96}
+.hlx-footer-wordmark em{color:#d1eaa0;font-style:normal;font-weight:450}
+.hlx-footer-wordmark small{display:block;margin-top:9px;font:750 9px/1.1 ui-monospace,Menlo,monospace;letter-spacing:.15em;color:#a0b5a1}
+.hlx-footer-symbol{display:grid;place-items:center;width:49px;height:49px;flex:none;border:1px solid #73906a;border-radius:12px;background:#253d2d;color:#d1eaa0;box-shadow:0 0 26px #95cc7824}
+.hlx-footer-brand>p{color:#b0bfb0;font:400 14px/1.8 ui-sans-serif,system-ui,sans-serif;max-width:370px;margin:27px 0 25px;letter-spacing:-.01em}
+.hlx-footer-method-note{display:inline-flex;align-items:center;gap:8px;color:#a9bca8;font:700 10px/1.5 ui-monospace,Menlo,monospace;letter-spacing:.06em}
+.hlx-footer-method-note svg{color:#d1eaa0;flex:none}
+.hlx-footer-column{display:flex;flex-direction:column;align-items:flex-start;gap:18px;min-width:0}
+.hlx-footer-column>h2{font:800 11px/1.5 ui-monospace,Menlo,monospace;color:#ebefdd;letter-spacing:.13em;margin:4px 0 8px}
+.hlx-footer-column>a{display:inline-flex;align-items:center;gap:9px;color:#b3c2b0;text-decoration:none;font:520 13px/1.45 ui-sans-serif,system-ui,sans-serif;transition:color .18s,transform .18s}
+.hlx-footer-column>a:hover{color:#d1eaa0;transform:translateX(3px)}
+.hlx-footer-column>a svg{flex:none;color:#b5d69d}
+.hlx-footer-bottom{border-top:1px solid #3c5142;padding:23px clamp(27px,5vw,83px) 27px;display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:86px}
+.hlx-footer-bottom>span{display:flex;align-items:center;gap:10px;font:750 10px/1.45 ui-monospace,Menlo,monospace;letter-spacing:.055em;color:#98a99a}
+.hlx-footer-bottom>span i{width:3px;height:3px;border-radius:50%;background:#889c8a}
+.hlx-footer-back-top{display:inline-flex;align-items:center;gap:9px;color:#b9c8b7;font:750 10px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;white-space:nowrap;text-decoration:none!important}
+.hlx-footer-back-top:hover{color:#d1eaa0}
+.hlx-credit-footer{flex-direction:row;align-items:baseline;gap:7px}
+.hlx-credit-footer .hlx-credit-overline{font-size:10px}
+.hlx-credit-footer .hlx-credit-name{font-size:18px}
+
+/* The deep Research Studio shares its footer and attribution without
+   changing its original research widgets and navigation. */
+.hlx-footer-studio{background:#08131e;padding:18px 32px 37px}
+.hlx-footer-studio .hlx-footer-panel{background:linear-gradient(145deg,#142c30,#0b1d26);border-color:#2d5055}
+.hlx-footer-studio .hlx-footer-symbol{background:#143c42;border-color:#3c7b7d}
+.hlx-footer-studio .hlx-footer-wordmark em,
+.hlx-footer-studio .hlx-footer-method-note svg,
+.hlx-footer-studio .hlx-footer-column>a svg{color:#83dfca}
+.hlx-footer-studio .hlx-credit-name{color:#83dfca}
+.workspace .topbar .hlx-credit{margin-left:14px}
+.workspace .topbar .hlx-credit-overline{color:#89a3ac}
+.workspace .topbar .hlx-credit-name{color:#8bd9ca}
+
+@media(max-width:1400px){
+  .ob-topbar .hlx-credit{min-width:65px}
+  .ob-topbar-identity{gap:12px}
+  .ob-topbar-credit-divider{height:25px}
+  .ob-topbar-brand>span:last-child{display:none}
+  .ob-topbar-brand>i{display:none}
+  .ob-topbar{gap:15px}
+}
+@media(max-width:1100px){
+  .hlx-footer-main{grid-template-columns:1.5fr 1fr 1fr;gap:32px}
+}
+@media(max-width:800px){
+  .hlx-footer-main{grid-template-columns:1fr 1fr;gap:35px}
+  .hlx-footer-brand{grid-column:1/-1}
+  .hlx-footer-bottom{flex-wrap:wrap}
+  .hlx-footer-bottom>span{flex-basis:100%}
+  .workspace .topbar .hlx-credit{display:none}
+}
+@media(max-width:640px){
+  .ob-topbar{padding:0 14px!important;gap:9px!important}
+  .ob-topbar-identity{gap:8px}
+  .ob-topbar-credit-divider{height:23px}
+  .ob-topbar .hlx-credit{min-width:58px;gap:1px}
+  .ob-topbar .hlx-credit-overline{font-size:7px;letter-spacing:.06em}
+  .ob-topbar .hlx-credit-name{font-size:13px}
+  .ob-header-full-label{display:none}
+  .ob-header-small-label{display:inline}
+  .ob-topbar-links>a{font-size:9px}
+  .hlx-footer{padding:16px 12px 24px}
+  .hlx-footer-studio{padding:14px 12px 24px}
+  .hlx-footer-panel{border-radius:17px}
+  .hlx-footer-main{grid-template-columns:1fr 1fr;gap:27px 19px;padding:30px 24px 31px}
+  .hlx-footer-brand>p{font-size:13px;line-height:1.7}
+  .hlx-footer-column{gap:17px}
+  .hlx-footer-column>a{font-size:12px}
+  .hlx-footer-column>h2{font-size:10px}
+  .hlx-footer-bottom{padding:21px 24px 24px;gap:19px}
+  .hlx-footer-bottom>span{font-size:9px}
+  .hlx-credit-footer{margin-left:auto}
+}
+@media(max-width:390px){
+  .ob-topbar-brand strong{font-size:18px}
+  .ob-topbar-links{gap:8px}
+  .ob-topbar .hlx-credit-overline{font-size:6.5px}
+  .hlx-footer-main{grid-template-columns:1fr}
+  .hlx-footer-brand{grid-column:auto}
+  .hlx-footer-bottom>span{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+  .hlx-credit *, .hlx-footer *{transition:none!important}
+}

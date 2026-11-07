@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { HuLaXCredit } from "@/components/hulax-credit";
+import { BrandFooter } from "@/components/brand-footer";
 import {
   ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen,
   Check, ChevronRight, CircleAlert, Crosshair, Database, Fingerprint,
@@ -216,9 +218,16 @@ export function Observatory() {
       <div className="ob-rail-bottom"><span className="ob-rail-coordinate">FIELD / 001</span><span>RESEARCH<br/>DESK / 01</span></div>
     </aside>
     <div className="ob-shell" id="ob-main">
-      <header className="ob-topbar">
-        <Link href="/" className="ob-topbar-brand"><BrandMark small/> <strong>BCPD<span> ONE</span></strong><i/> <span>THE OBSERVATORY</span></Link>
-        <div className="ob-topbar-links"><Link href="/research">OPEN FULL STUDIO <ArrowUpRight size={15}/></Link><Link href="/methodology">METHOD</Link></div>
+      <header className="ob-topbar" id="top">
+        <div className="ob-topbar-identity">
+          <Link href="/" className="ob-topbar-brand"><BrandMark small/> <strong>BCPD<span> ONE</span></strong><i/> <span>THE OBSERVATORY</span></Link>
+          <span className="ob-topbar-credit-divider" aria-hidden="true" />
+          <HuLaXCredit />
+        </div>
+        <div className="ob-topbar-links">
+          <Link href="/research"><span className="ob-header-full-label">OPEN FULL STUDIO</span><span className="ob-header-small-label">STUDIO</span> <ArrowUpRight size={15}/></Link>
+          <Link href="/methodology">METHOD</Link>
+        </div>
         <div className="ob-topbar-chip"><span/> RESEARCH ENVIRONMENT</div>
       </header>
       <main>
@@ -339,11 +348,7 @@ export function Observatory() {
           </div>
         </section>
       </main>
-      <footer className="ob-footer">
-        <div><BrandMark small/><span>BCPD ONE <b>/ RESEARCH INSTRUMENTS</b></span></div>
-        <div><Link href="/methodology">METHODOLOGY</Link><Link href="/privacy">DATA PRACTICES</Link><a href="https://github.com/HuLaxx/BCPD" rel="noreferrer" target="_blank">SOURCE CODE <ArrowUpRight size={12}/></a></div>
-        <span>HISTORICAL RESEARCH ONLY · NOT A TRADING SIGNAL</span>
-      </footer>
+      <BrandFooter />
     </div>
   </div>;
 }
