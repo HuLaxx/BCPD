@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import json
 from dataclasses import asdict
+from datetime import datetime, timezone
 from pathlib import Path
 
 from .baselines import cusum_alerts
@@ -22,6 +23,7 @@ from .benchmark import (
     threshold_alerts, variance_shift_scores, weekly_log_returns,
 )
 from .calibration import select_threshold
+from .temporal_integrity import finalized_prices, parse_asof_utc
 
 MODELS = ("bcpd", "rolling_variance", "two_sided_cusum")
 
@@ -36,12 +38,32 @@ def run(
     hazard_weeks: int = 32,
     variance_window_weeks: int = 12,
     tolerance_weeks: int = 2,
+    asof_utc: str | None = None,
 ) -> dict:
     if not (0.35 <= fit_fraction < test_fraction <= 0.8):
         raise ValueError("Require fit fraction >=0.35 and test fraction <=0.8")
     if tolerance_weeks < 0 or tolerance_weeks > 12:
         raise ValueError("Event tolerance must be 0 to 12 weeks")
-    observations = weekly_log_returns(read_prices(prices))
+    # Fail on tampered provenance before spending time fitting models.
+    manifest_path = prices.with_suffix(".provenance.json")
+    manifest = None
+    if manifest_path.exists():
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if not isinstance(manifest, dict):
+            raise ValueError("Snapshot provenance must be a JSON object")
+        if manifest.get("csv_sha256") != sha256(prices):
+            raise ValueError("Price CSV hash does not match its provenance manifest")
+        captured_at = manifest.get("snapshot_captured_at")
+        if not isinstance(captured_at, str):
+            raise ValueError("Snapshot provenance requires snapshot_captured_at")
+        if asof_utc is not None:
+            raise ValueError("Cannot override the captured as-of date of a hashed source snapshot")
+        asof = parse_asof_utc(captured_at)
+    else:
+        asof = (parse_asof_utc(asof_utc) if asof_utc is not None
+                else datetime.now(timezone.utc).date())
+    completed_prices, integrity = finalized_prices(read_prices(prices), asof)
+    observations = weekly_log_returns(completed_prices)
     n = len(observations)
     fit_end = int(n * fit_fraction)
     test_start = int(n * test_fraction)
@@ -86,18 +108,13 @@ def run(
             threshold=thresholds["two_sided_cusum"].threshold)
             if i >= test_start],
     }
-    manifest_path = prices.with_suffix(".provenance.json")
-    manifest = None
-    if manifest_path.exists():
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        if manifest.get("csv_sha256") != sha256(prices):
-            raise ValueError("Price CSV hash does not match its provenance manifest")
     report = {
         "schema": "bcpd.calibrated-market-audit.v1",
         "status": "unvalidated comparative research; no original thesis parity",
         "source": {
             "file": prices.name, "sha256": sha256(prices),
             "manifest": manifest,
+            "weekly_temporal_integrity": integrity,
             "note": "Original provider data are not redistributed by this report.",
         },
         "protocol": {
@@ -163,6 +180,7 @@ def main() -> None:
     parser.add_argument("--hazard", type=int, default=32)
     parser.add_argument("--variance-window", type=int, default=12)
     parser.add_argument("--tolerance-weeks", type=int, default=2)
+    parser.add_argument("--asof-utc", help="ISO-8601 UTC time when price CSV has no provenance sidecar")
     args = parser.parse_args()
     result = run(
         args.prices, args.events,
@@ -171,6 +189,7 @@ def main() -> None:
         annual_alert_budget=args.annual_alert_budget,
         hazard_weeks=args.hazard, variance_window_weeks=args.variance_window,
         tolerance_weeks=args.tolerance_weeks,
+        asof_utc=args.asof_utc,
     )
     serialized = json.dumps(result, indent=2, allow_nan=False) + "\n"
     if args.out:
