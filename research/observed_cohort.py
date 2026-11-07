@@ -125,8 +125,16 @@ def main() -> None:
     args.out.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     print(f"Unvalidated observed-market comparison: {args.out}")
     for market in report["markets"]:
-        counts = " | ".join(f"{name}={market['models'][name]['test_alert_count']}" for name in MODELS)
-        print(f"{market['asset']} {market['test_period_start']}–{market['test_period_end']}: {counts}")
+        print(f"MARKET {market['asset']} | {market['test_period_start']} to {market['test_period_end']} | {market['test_weeks']} held-out weeks")
+        for name in MODELS:
+            model = market["models"][name]
+            print(
+                f"  {name}: threshold={model['calibrated_threshold']}; "
+                f"calibration={model['calibration_alerts']}/{model['calibration_allowed']}; "
+                f"holdout={model['test_alert_count']}; "
+                f"annualized_alert_count={model['test_alerts_per_52_weeks']}; "
+                f"alert_weeks={','.join(model['test_alert_week_ends']) or 'none'}"
+            )
     print("NO VERIFIED EVENT LABELS: do not infer F1, precision, false-alarm rates or model superiority.")
 
 
