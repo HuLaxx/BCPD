@@ -103,7 +103,7 @@ export function displayNumber(value: number, digits = 2): string {
 /** Exclude in-progress Saturday-ending UTC weeks from a dated provider snapshot. */
 export function completedWeeklyCloses(points: PricePoint[], accessedAt: string): WeeklyPoint[] {
   const stamp = new Date(accessedAt);
-  if (!Number.isFinite(stamp.getTime()) || !/(Z|[+-]\\d{2}:\\d{2})$/.test(accessedAt)) {
+  if (!Number.isFinite(stamp.getTime()) || !/(Z|[+-][0-9]{2}:[0-9]{2})$/.test(accessedAt)) {
     throw new Error("A timezone-aware source retrieval timestamp is required.");
   }
   const asof = stamp.toISOString().slice(0, 10);

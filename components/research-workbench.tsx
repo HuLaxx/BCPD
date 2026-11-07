@@ -308,7 +308,7 @@ export function ResearchWorkbench() {
         </section>
 
         <section className="methodology-strip"><div className="method-icon"><ShieldCheck size={22}/></div><div><strong>Scientific clarity is a feature, not a footnote.</strong>
-          <p>The Gaussian mean-shift BOCPD model uses whole-sample variance and a first-observation prior. Results are retrospective; nine-setting sensitivity is parameter agreement, not prediction confidence. Yahoo Finance is an unofficial historical source, and free APIs may fail. Imported files are processed client-side. <a className="inline-link" href="/methodology">Read the full methodology.</Link></p></div>
+          <p>The Gaussian mean-shift BOCPD model uses whole-sample variance and a first-observation prior. Results are retrospective; nine-setting sensitivity is parameter agreement, not prediction confidence. Yahoo Finance is an unofficial historical source, and free APIs may fail. Imported files are processed client-side. <Link className="inline-link" href="/methodology">Read the full methodology.</Link></p></div>
           <a href="https://github.com/HuLaxx/BCPD" target="_blank" rel="noopener noreferrer">REPRODUCIBLE SOURCE <ArrowRight size={17}/></a></section>
       </main>
       <footer className="workspace-footer"><span>© BCPD ONE · BAYESIAN CHANGE-POINT RESEARCH</span><span><Link href="/methodology">METHODOLOGY</Link> · <Link href="/privacy">PRIVACY</Link> · NOT INVESTMENT ADVICE</span></footer>
