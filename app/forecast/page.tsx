@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ForecastLab } from "@/components/forecast-lab";
 import "../observatory.css";
 import "./forecast.css";
+import "./forecast-v3.css";
 
 export const metadata:Metadata={
   title:"Forecast Lab | BCPD One",

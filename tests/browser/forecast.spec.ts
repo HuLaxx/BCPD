@@ -19,17 +19,23 @@ test("forecast lab projects future weekly points, changes horizons and exports p
     await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(forecastHistory(id))});
   });
   await page.goto("/forecast");
-  await expect(page.getByRole("heading",{name:/The future is/i})).toBeVisible();
+  await expect(page.getByRole("heading",{name:/Make uncertainty/i})).toBeVisible();
   await expect(page.getByText("HISTORICAL INPUT READY")).toBeVisible();
   await expect(page.getByText(/Synthetic browser fixture/)).toBeVisible();
   await expect(page.getByText("12 future weeks")).toBeVisible();
+  await page.getByRole("group",{name:"Inspect future forecast week"}).getByRole("button",{name:/W\+04/}).click();
+  await expect(page.getByRole("button",{name:/W\+04/})).toHaveAttribute("aria-pressed","true");
+  await expect(page.locator(".fc-point-readout")).toContainText("Nominal 95% range");
+  await page.getByRole("group",{name:"Inspect future forecast week"}).getByRole("button",{name:/W\+12/}).click();
   await expect(page.getByRole("img",{name:/projected future weekly points/i})).toBeVisible();
   await page.getByRole("group",{name:"Forecast horizon"}).getByRole("button",{name:"4W"}).click();
   await expect(page.getByText("4 future weeks")).toBeVisible();
+  await expect(page.getByRole("group",{name:"Inspect future forecast week"}).getByRole("button",{name:/W\+12/})).toBeDisabled();
+  await expect(page.getByRole("group",{name:"Inspect future forecast week"}).getByRole("button",{name:/W\+04/})).toHaveAttribute("aria-pressed","true");
   await page.getByLabel("FORECASTING MODEL").selectOption("random-walk");
   await expect(page.getByText("RANDOM-WALK ERROR")).toBeVisible();
   const event=page.waitForEvent("download");
-  await page.getByRole("button",{name:/EXPORT RESEARCH/}).click();
+  await page.getByRole("button",{name:/EXPORT EVIDENCE/}).click();
   expect((await event).suggestedFilename()).toBe("bcpd-us-forecast-research.json");
 });
 
@@ -50,8 +56,9 @@ test("forecast lab has no horizontal overflow on phone viewport",async({page})=>
     await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(forecastHistory())});
   });
   await page.goto("/forecast");
-  await expect(page.getByRole("heading",{name:/The future is/i})).toBeVisible();
+  await expect(page.getByRole("heading",{name:/Make uncertainty/i})).toBeVisible();
   await expect(page.getByText("HISTORICAL INPUT READY")).toBeVisible();
+  await expect(page.getByRole("navigation",{name:"Mobile research navigation"})).toBeVisible();
   const overflow=await page.evaluate(()=>
     document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
   expect(overflow).toBeFalsy();

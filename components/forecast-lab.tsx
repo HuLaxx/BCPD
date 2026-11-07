@@ -27,7 +27,7 @@ type Computation={
 function svgPath(ps:readonly [number,number][]):string{
   return ps.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+","+p[1].toFixed(2)).join(" ");
 }
-function ForecastChart({rows,result}:{rows:ReturnPoint[];result:ForecastResult}){
+function ForecastChart({rows,result,focusWeek}:{rows:ReturnPoint[];result:ForecastResult;focusWeek:Horizon}){
   const observed=rows.slice(-53),future=result.future;
   const W=860,H=270,originIndex=observed.length-1,total=originIndex+future.length;
   const px=(i:number)=>i/total*W;
@@ -47,6 +47,7 @@ function ForecastChart({rows,result}:{rows:ReturnPoint[];result:ForecastResult})
     return svgPath(upper)+" "+svgPath(lower).replace(/^M/,"L")+" Z";
   };
   const last=future[future.length-1];
+  const selected=future[focusWeek-1];
   return <div className="fc-chart">
     <div className="fc-chart-legend">
       <span><i className="fc-legend-observed"/> OBSERVED CLOSE</span>
@@ -66,6 +67,12 @@ function ForecastChart({rows,result}:{rows:ReturnPoint[];result:ForecastResult})
         <path d={svgPath(projections.map((p,i)=>[px(originIndex+i),py(p.median)]))} stroke="#F2BE96" strokeWidth="2.7" strokeDasharray="8 7" strokeLinecap="round" fill="none" vectorEffect="non-scaling-stroke"/>
         <line x1={px(originIndex)} x2={px(originIndex)} y1="0" y2="270" stroke="#F2BE96" strokeDasharray="3 5"/>
         <circle cx={px(originIndex)} cy={py(result.observedClose)} r="5" fill="#F2BE96" stroke="#14201F" strokeWidth="2"/>
+        <line x1={px(originIndex+focusWeek)} x2={px(originIndex+focusWeek)} y1="0" y2="270"
+          stroke="#F5D6B8" strokeOpacity=".7" strokeWidth="1.5" strokeDasharray="5 7"/>
+        <circle cx={px(originIndex+focusWeek)} cy={py(selected.median)} r="6.5" fill="#152325"
+          stroke="#F3BB92" strokeWidth="2.5">
+          <title>{"Selected forecast week "+selected.weekEnd+": median "+displayNumber(selected.median)}</title>
+        </circle>
       </svg>
     </div>
     <div className="fc-dates"><span>{observed[0]?.date}</span><span>ORIGIN {result.originWeek}</span><span>{last.weekEnd}</span></div>
@@ -81,6 +88,7 @@ function ValidationCard({label,data,target}:{label:string;data?:BacktestAggregat
 export function ForecastLab(){
   const [assetId,setAssetId]=useState("us");
   const [horizon,setHorizon]=useState<Horizon>(12);
+  const [requestedFocus,setRequestedFocus]=useState<Horizon>(12);
   const [model,setModel]=useState<ForecastMethod>("shrunken-gaussian");
   const [retry,setRetry]=useState(0);
   const [state,setState]=useState<Loaded|null>(null);
@@ -118,6 +126,8 @@ export function ForecastLab(){
   const error=current?.error??(outcome&&"error" in outcome?outcome.error:undefined);
   const pending=!current;
   const last=computed?.forecast.future.at(-1);
+  const focusWeek=requestedFocus>horizon?horizon:requestedFocus;
+  const focus=computed?.forecast.future[focusWeek-1];
   const reload=()=>{setState(null);setRetry(x=>x+1);};
   function exportForecast(){
     if(!computed||!current)return;
@@ -155,19 +165,25 @@ export function ForecastLab(){
       </header>
       <main>
         <section className="fc-hero">
-          <div><span className="fc-micro fc-kicker">02 / HORIZON RESEARCH · EXPERIMENTAL FORECASTING</span>
-            <h1>The future is<br/><em>a distribution.</em></h1>
-            <p>Explore possible future weekly prices and their uncertainty. Compare honest statistical baselines and see how historical predictions would have performed.</p></div>
+          <div><span className="fc-micro fc-kicker">02 / BCPD INTELLIGENCE · FORECAST DESK V3</span>
+            <h1>Make uncertainty<br/><em>useful.</em></h1>
+            <p>Explore future price distributions, inspect the assumptions behind each projection, and compare forecasts against outcomes that were unseen at their historical origins.</p></div>
           <div className="fc-scientific-contract"><span className="fc-micro">THE SCIENTIFIC CONTRACT</span>
             <h2>Estimate.<br/>Test.<br/>Disclose.</h2>
-            <p>A model forecast is not a guaranteed price target, a predicted change-point date, or investment advice.</p></div>
+            <p>Model ranges are not calibrated. Forecasts are neither guaranteed price targets nor predictions of the next change-point date.</p></div>
+        </section>
+        <section className="fc-context-strip" aria-label="Data and model context">
+          <div><span className="fc-micro">INSTRUMENT</span><strong>{asset.label} <span>{asset.symbol}</span></strong></div>
+          <div><span className="fc-micro">FREQUENCY</span><strong>WEEKLY <span>/ UTC</span></strong></div>
+          <div><span className="fc-micro">FORECAST ORIGIN</span><strong>{computed?.forecast.originWeek??"NOT AVAILABLE"}</strong></div>
+          <div><span className="fc-micro">SCIENTIFIC STATUS</span><strong className="fc-caution-text">EXPERIMENTAL</strong></div>
         </section>
         <section className="fc-experiment">
-          <div className="fc-section-title"><div><span className="fc-micro">HORIZON EXPERIMENT 001</span><h2>Forecast workspace.</h2></div>
-            <span className="fc-market-status">{error?"SOURCE UNAVAILABLE":pending?"FETCHING HISTORY":"HISTORICAL INPUT READY"}</span></div>
+          <div className="fc-section-title"><div><span className="fc-micro">01 / FORWARD DISTRIBUTION</span><h2>The projection room.</h2></div>
+            <span role="status" aria-live="polite" className="fc-market-status">{error?"SOURCE UNAVAILABLE":pending?"FETCHING HISTORY":"HISTORICAL INPUT READY"}</span></div>
           <div className="fc-workspace">
             <aside className="fc-settings">
-              <span className="fc-micro">01 / MODEL CONFIGURATION</span><h3>Choose a baseline.</h3>
+              <span className="fc-micro">01 / MODEL CONFIGURATION</span><h3>Shape the experiment.</h3>
               <label htmlFor="fc-asset" className="fc-field-label">MARKET / INSTRUMENT</label>
               <select id="fc-asset" value={assetId} onChange={event=>setAssetId(event.target.value)}>
                 {ASSETS.map(a=><option value={a.id} key={a.id}>{a.label} · {a.symbol}</option>)}
@@ -184,18 +200,42 @@ export function ForecastLab(){
               <div className="fc-assumptions"><strong>What this model assumes</strong><p>Weekly log returns follow an independent Gaussian distribution with stable volatility. The drift estimate is shrunk toward zero.</p><p>Neither baseline forecasts when the next market regime begins.</p></div>
             </aside>
             <div className="fc-main-panel">
-              <div className="fc-panel-title"><div><span className="fc-micro">02 / OBSERVED HISTORY + POSSIBLE FUTURE</span><h3>Price distribution / forecast fan</h3></div>
+              <div className="fc-panel-title"><div><span className="fc-micro">02 / OBSERVED HISTORY + FUTURE DISTRIBUTION</span><h3>Price paths / probability fan</h3></div>
                 <button type="button" className="fc-refresh" onClick={reload} aria-label="Reload historical data"><RotateCw size={17}/></button></div>
-              {computed&&current?.returns?<ForecastChart rows={current.returns} result={computed.forecast}/>:
+              {computed&&current?.returns?<ForecastChart rows={current.returns} result={computed.forecast} focusWeek={focusWeek}/>:
                 <div role={error?"alert":"status"} className="fc-empty"><FlaskConical size={29}/><h3>{error?"Forecast unavailable":"Preparing forward model"}</h3>
                   <p>{error??"Reading completed weekly history and fitting the exploratory model."}</p>
                   {error&&<button type="button" onClick={reload}>RETRY SOURCE</button>}</div>}
               <div className="fc-source-row"><div><ShieldCheck size={16}/><span>{computed?
                 asset.label+" · "+computed.forecast.fitWeeks+" fitted weeks · "+current?.source+" · accessed "+current?.accessedAt?.slice(0,10)+" UTC":
                 "Source and model provenance will appear with a completed forecast."}</span></div>
-                <button type="button" onClick={exportForecast} disabled={!computed}><ArrowDownToLine size={14}/> EXPORT RESEARCH</button></div>
+                <button type="button" onClick={exportForecast} disabled={!computed}><ArrowDownToLine size={14}/> EXPORT EVIDENCE</button></div>
             </div>
           </div>
+
+          <section id="fc-point-inspector" className="fc-inspector" aria-labelledby="fc-inspector-title">
+            <div className="fc-inspector-intro">
+              <span className="fc-micro">04 / READ ONE MODEL POINT</span>
+              <h3 id="fc-inspector-title">Inspect a future week.</h3>
+              <p>Pick a projected week to highlight its position on the chart and read its model-conditional price range.</p>
+            </div>
+            <div className="fc-inspector-content">
+              <div className="fc-point-options" role="group" aria-label="Inspect future forecast week">
+                {HORIZONS.map(value=><button key={value} type="button" aria-pressed={focusWeek===value}
+                  disabled={!computed||value>horizon}
+                  onClick={()=>setRequestedFocus(value)} className={focusWeek===value&&computed?"selected":""}>
+                  <strong>W+{String(value).padStart(2,"0")}</strong>
+                  <small>{value>horizon?"BEYOND HORIZON":value===focusWeek?"SELECTED":"INSPECT POINT"}</small>
+                </button>)}
+              </div>
+              {focus&&computed?<dl className="fc-point-readout" aria-live="polite">
+                <div><dt>Projected week end</dt><dd>{focus.weekEnd}</dd></div>
+                <div><dt>Model median</dt><dd>{displayNumber(focus.median)}</dd></div>
+                <div><dt>Nominal 80% range</dt><dd>{displayNumber(focus.p80.lower)} — {displayNumber(focus.p80.upper)}</dd></div>
+                <div><dt>Nominal 95% range</dt><dd>{displayNumber(focus.p95.lower)} — {displayNumber(focus.p95.upper)}</dd></div>
+              </dl>:<p className="fc-inspector-empty" role="status">Load a valid historical series to inspect its forward projections.</p>}
+            </div>
+          </section>
           {computed&&last&&<div className="fc-projections">
             <div><span className="fc-micro">PROJECTED WEEK END</span><strong>{last.weekEnd}</strong><small>{horizon} future weeks</small></div>
             <div><span className="fc-micro">MODEL MEDIAN</span><strong>{displayNumber(last.median)}</strong><small>Not a guaranteed price</small></div>
@@ -221,6 +261,12 @@ export function ForecastLab(){
           <Link href="/research" className="fc-next-link">OPEN RESEARCH STUDIO <ArrowRight size={16}/></Link></section>
       </main>
       <BrandFooter/>
+      <nav className="fc-mobile-nav" aria-label="Mobile research navigation">
+        <Link href="/"><Crosshair size={17} aria-hidden="true"/>OBSERVE</Link>
+        <Link href="/forecast" aria-current="page"><FlaskConical size={17} aria-hidden="true"/>FORECAST</Link>
+        <Link href="/research"><SlidersHorizontal size={17} aria-hidden="true"/>STUDIO</Link>
+        <Link href="/methodology"><ShieldCheck size={17} aria-hidden="true"/>METHOD</Link>
+      </nav>
     </div>
   </div>;
 }
