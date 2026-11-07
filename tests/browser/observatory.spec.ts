@@ -69,7 +69,7 @@ test("mobile layout remains within viewport and advanced studio is preserved", a
     ()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2
   );
   expect(hasOverflow).toBeFalsy();
-  await page.getByRole("link",{name:/OPEN FULL STUDIO/}).first().click();
+  await page.getByRole("link",{name:"Open full research studio"}).click();
   await expect(page).toHaveURL(/\/research$/);
   await expect(page.getByText("RESEARCH INTELLIGENCE")).toBeVisible();
 });

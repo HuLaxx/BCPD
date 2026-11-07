@@ -225,7 +225,7 @@ export function Observatory() {
           <HuLaXCredit />
         </div>
         <div className="ob-topbar-links">
-          <Link href="/research"><span className="ob-header-full-label">OPEN FULL STUDIO</span><span className="ob-header-small-label">STUDIO</span> <ArrowUpRight size={15}/></Link>
+          <Link href="/research" aria-label="Open full research studio"><span className="ob-header-full-label">OPEN FULL STUDIO</span><span className="ob-header-small-label">STUDIO</span> <ArrowUpRight size={15}/></Link>
           <Link href="/methodology">METHOD</Link>
         </div>
         <div className="ob-topbar-chip"><span/> RESEARCH ENVIRONMENT</div>
