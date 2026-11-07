@@ -352,3 +352,8 @@
 @media(prefers-reduced-motion:reduce){
   .ob-page *,.ob-page *::before,.ob-page *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+
+@media(max-width:640px){
+  .ob-eyebrow{flex-wrap:wrap}
+  .ob-intro-actions .ob-button{white-space:normal;text-align:center;line-height:1.45}
+}

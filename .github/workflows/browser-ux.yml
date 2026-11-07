@@ -1,0 +1,38 @@
+name: BCPD One / Browser UX
+
+on:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'lib/**'
+      - 'tests/browser/**'
+      - 'package.json'
+      - '.github/workflows/browser-ux.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-ux-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromium:
+    name: Accessibility / mobile / data integrity (Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test source loading, exports, routes and mobile viewport
+        run: npm run test:ui
