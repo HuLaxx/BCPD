@@ -47,7 +47,7 @@ test("forecast lab fails visibly when provider history is missing",async({page})
   await page.goto("/forecast");
   await expect(page.locator(".fc-empty[role=alert]")).toContainText("Synthetic provider outage.");
   await expect(page.getByRole("button",{name:/RETRY SOURCE/})).toBeVisible();
-  await expect(page.getByRole("button",{name:/EXPORT RESEARCH/})).toBeDisabled();
+  await expect(page.getByRole("button",{name:/EXPORT EVIDENCE/})).toBeDisabled();
 });
 
 test("forecast lab has no horizontal overflow on phone viewport",async({page})=>{
@@ -61,5 +61,19 @@ test("forecast lab has no horizontal overflow on phone viewport",async({page})=>
   await expect(page.getByRole("navigation",{name:"Mobile research navigation"})).toBeVisible();
   const overflow=await page.evaluate(()=>
     document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
+  expect(overflow).toBeFalsy();
+});
+
+test("forecast desk keeps the inspector and mobile navigation usable at 320px",async({page})=>{
+  await page.setViewportSize({width:320,height:720});
+  await page.route("**/api/markets?**",async route=>{
+    await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(forecastHistory())});
+  });
+  await page.goto("/forecast");
+  await expect(page.getByRole("heading",{name:/Make uncertainty/i})).toBeVisible();
+  await expect(page.getByRole("navigation",{name:"Mobile research navigation"}).getByRole("link",{name:"FORECAST"})).toHaveAttribute("aria-current","page");
+  await expect(page.getByText("HISTORICAL INPUT READY")).toBeVisible();
+  await expect(page.getByRole("group",{name:"Inspect future forecast week"})).toBeVisible();
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
   expect(overflow).toBeFalsy();
 });

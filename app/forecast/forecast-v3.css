@@ -412,3 +412,12 @@
 @media(prefers-reduced-motion:reduce){
   .fc-point-options button,.fc-page .fc-refresh{transition:none!important;transform:none!important}
 }
+
+@media(max-width:365px){
+  .fc-page .ob-topbar-identity .ob-topbar-credit-divider,
+  .fc-page .ob-topbar-identity .hlx-credit{display:none!important}
+  .fc-page .ob-topbar{gap:8px}
+  .fc-page .ob-topbar-brand{gap:5px}
+  .fc-page .fc-header-tray{gap:0;min-width:0}
+  .fc-page .fc-header-tray>span{max-width:110px;font-size:7px}
+}
