@@ -54,7 +54,7 @@ test("source failure remains honest and offers recovery", async({page})=>{
     await route.fulfill({status:503,contentType:"application/json",body:JSON.stringify({error:"Provider intentionally unavailable."})});
   });
   await page.goto("/");
-  await expect(page.getByRole("alert")).toContainText("Provider intentionally unavailable.");
+  await expect(page.locator(".ob-chart-empty[role=alert]")).toContainText("Provider intentionally unavailable.");
   await expect(page.getByRole("button",{name:/RETRY SOURCE/})).toBeVisible();
 });
 
