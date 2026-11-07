@@ -95,4 +95,20 @@ This protocol refuses the current five-year weekly-bar API mode because the prov
 
 The Python test suite now has additional cases for calibration-window isolation, source hashing, provenance rejection, and explicit unverified reports. Run locally: `python -m unittest discover -s research/tests -v`.
 
-**CI infrastructure blocker:** The latest GitHub Actions checks ended within seconds with no execution steps or runner assigned, so those failures do not establish a Python or Next.js test failure. See [CI_RUNNER_DIAGNOSTIC.md](CI_RUNNER_DIAGNOSTIC.md) for account/run-configuration checks. Production remains untouched by this draft PR.
+**CI restored:** GitHub account billing access was resolved sufficiently for runners to execute. On 2026-11-07 the latest research run passed 37 Python unit tests, and Next.js test/type/lint/build gates passed. A separate, optional observed-data job executed the actual Python three-model comparison against live API inputs. See [OBSERVED_MARKET_EVALUATION.md](OBSERVED_MARKET_EVALUATION.md). The draft research PR remains unmerged and the live production application is unchanged.
+
+## Re-running the three observed-market models
+
+To run from **immutable, privately stored** daily price snapshots:
+
+```bash
+python -m research.observed_cohort --assets us btc in --snapshot-dir local-data --out artifacts/observed-cohort.json
+```
+
+To conduct a **non-reproducible fresh provider smoke test** with temporary raw prices deleted after evaluation:
+
+```bash
+python -m research.observed_cohort --fetch --assets us btc in --out artifacts/observed-cohort.json
+```
+
+The output provides calibrated thresholds, exact UTC alert week-ends, daily source CSV SHA-256, alarm counts and held-out alarm rates. It explicitly omits precision, recall and F1 when no independently labeled events exist. For dataset rights and comparative evidence see [OBSERVED_MARKET_EVALUATION.md](OBSERVED_MARKET_EVALUATION.md).

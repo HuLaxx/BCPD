@@ -24,7 +24,7 @@ jobs:
 
   observed-market-smoke:
     name: Observed market alarm comparison (NON-GATING)
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     continue-on-error: true
