@@ -16,6 +16,7 @@ from pathlib import Path
 from statistics import variance
 
 from .bcpd import fit_settings, online_probabilities
+from .baselines import cusum_alerts
 
 
 def read_prices(path: Path) -> list[tuple[str, float]]:
@@ -124,7 +125,8 @@ def sha256(path: Path) -> str:
 
 def run(prices: Path, events: Path | None = None, *, split: float = 0.7,
         hazard: int = 32, window: int = 12, bcpd_threshold: float = 0.35,
-        variance_threshold: float = 1.0, tolerance_weeks: int = 2) -> dict:
+        variance_threshold: float = 1.0, cusum_threshold: float = 5.0,
+        tolerance_weeks: int = 2) -> dict:
     if not 0.5 <= split <= 0.85:
         raise ValueError("split must be between 0.5 and 0.85")
     weekly = weekly_log_returns(read_prices(prices))
@@ -139,6 +141,7 @@ def run(prices: Path, events: Path | None = None, *, split: float = 0.7,
     base = variance_shift_scores(values, window)
     alert_a = threshold_alerts(bcpd, bcpd_threshold, cut)
     alert_b = threshold_alerts(base, variance_threshold, cut)
+    alert_c = cusum_alerts(values, values[:cut], cut, threshold=cusum_threshold)
     report = {
         "schema": "bcpd.reproduction.audit.v1",
         "status": "protocol only — original dissertation model not verified",
@@ -149,13 +152,15 @@ def run(prices: Path, events: Path | None = None, *, split: float = 0.7,
         "configuration": {"hazard_weeks": hazard, "variance_window_weeks": window,
                           "bcpd_threshold": bcpd_threshold,
                           "variance_log_ratio_threshold": variance_threshold,
+                          "cusum_standardized_threshold": cusum_threshold,
                           "event_tolerance_weeks": tolerance_weeks,
                           "split": split, "thresholds": "preconfigured; not tuned on test"},
         "model": {"name": "Gaussian mean-shift BOCPD, stdlib independent prototype",
                   "assumptions": "fixed noise variance and prior fitted on training only",
                   "settings": asdict(settings)},
         "test_alerts": {"bcpd": [weekly[i][0] for i in alert_a],
-                        "rolling_variance": [weekly[i][0] for i in alert_b]},
+                        "rolling_variance": [weekly[i][0] for i in alert_b],
+                        "two_sided_cusum": [weekly[i][0] for i in alert_c]},
         "evaluation": {"verified": False, "reason": "independent labels not supplied"},
         "disclaimer": "Not the original PyMC3 dissertation model or a verified 35% improvement."
     }
@@ -172,14 +177,15 @@ def run(prices: Path, events: Path | None = None, *, split: float = 0.7,
             raise ValueError("no independently labeled events in the held-out test partition")
         m_a = event_metrics(alert_a, labels_test, tolerance_weeks)
         m_b = event_metrics(alert_b, labels_test, tolerance_weeks)
+        m_c = event_metrics(alert_c, labels_test, tolerance_weeks)
         relative_f1 = (100 * (m_a["f1"] / m_b["f1"] - 1)
                        if m_a["f1"] is not None and m_b["f1"] is not None and m_b["f1"] > 0 else None)
         report["evaluation"] = {
             "verified": False,
             "reason": "protocol comparison only; dissertation parity and event-label validity require independent audit",
             "test_reference_events": [{"week": day, "source": source} for day, source in annotations if index[day] >= cut],
-            "bcpd": m_a, "rolling_variance": m_b,
-            "relative_f1_improvement_pct": relative_f1,
+            "bcpd": m_a, "rolling_variance": m_b, "two_sided_cusum": m_c,
+            "exploratory_f1_change_vs_rolling_variance_pct": relative_f1,
             "improvement_metric": "relative held-out event-matching F1; not assumed to be the thesis metric",
         }
     return report
@@ -195,11 +201,13 @@ def main() -> None:
     parser.add_argument("--window", type=int, default=12)
     parser.add_argument("--bcpd-threshold", type=float, default=0.35)
     parser.add_argument("--variance-threshold", type=float, default=1.0)
+    parser.add_argument("--cusum-threshold", type=float, default=5.0)
     parser.add_argument("--tolerance-weeks", type=int, default=2)
     args = parser.parse_args()
     report = run(args.prices, args.events, split=args.split, hazard=args.hazard,
                  window=args.window, bcpd_threshold=args.bcpd_threshold,
-                 variance_threshold=args.variance_threshold, tolerance_weeks=args.tolerance_weeks)
+                 variance_threshold=args.variance_threshold,
+                 cusum_threshold=args.cusum_threshold, tolerance_weeks=args.tolerance_weeks)
     result = json.dumps(report, indent=2, allow_nan=False)
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
