@@ -42,7 +42,7 @@ def snapshots(
 
 def evaluate_cohort(files: dict[str, Path]) -> dict:
     if not files or any(asset not in SYMBOLS for asset in files):
-        raise ValueError("Unknown or empty five-year cohort")
+        raise ValueError("Five-year cohort must contain only allowlisted assets")
     markets = []
     for asset, path in files.items():
         if path.name != f"{asset}-5y.csv":
