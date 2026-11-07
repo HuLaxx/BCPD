@@ -50,20 +50,31 @@ def parse_yahoo_daily(result: object, asset: str, fetched_at: str) -> dict:
         raise ValueError("Adjusted and raw close record lengths differ")
     if len(timestamps) < 800 or len(timestamps) > 2100:
         raise ValueError("Provider did not return a plausible five-year DAILY series")
-    observations = []
+    # Critical scientific invariant: never mix split/dividend-adjusted closes
+    # with raw closes on different days. A one-day fallback can fabricate a
+    # jump that a change-point detector interprets as an economic regime break.
     from math import isfinite
+    def valid_price(value: object) -> bool:
+        return (isinstance(value, (int, float)) and not isinstance(value, bool)
+                and isfinite(value) and value > 0)
+
+    all_adjusted_valid = adjusted is not None and all(valid_price(x) for x in adjusted)
+    selected = adjusted if all_adjusted_valid else quotes
+    basis = ("adjusted close throughout series" if all_adjusted_valid
+             else "raw close throughout series; adjusted coverage incomplete or absent")
+    observations = []
+    last_date = None
     for i, epoch in enumerate(timestamps):
-        if not isinstance(epoch, (float, int)) or isinstance(epoch, bool):
+        if not isinstance(epoch, (float, int)) or isinstance(epoch, bool) or not isfinite(epoch):
             raise ValueError("Provider timestamp is invalid")
         day = datetime.fromtimestamp(epoch, timezone.utc).date().isoformat()
-        # Prefer the adjusted series only when it provides an actual value.
-        value = adjusted[i] if adjusted is not None and adjusted[i] is not None else quotes[i]
-        if not isinstance(value, (float, int)) or isinstance(value, bool) or not isfinite(value) or value <= 0:
+        if last_date is not None and day <= last_date:
+            raise ValueError("Daily source timestamps are duplicated or not strictly increasing")
+        last_date = day
+        value = selected[i]
+        if not valid_price(value):
             continue
-        if observations and observations[-1]["date"] == day:
-            observations[-1] = {"date": day, "close": float(value)}
-        else:
-            observations.append({"date": day, "close": float(value)})
+        observations.append({"date": day, "close": float(value)})
     if len(observations) < 800:
         raise ValueError("Insufficient valid daily values in five-year chart")
     start = date.fromisoformat(observations[0]["date"])
@@ -80,7 +91,7 @@ def parse_yahoo_daily(result: object, asset: str, fetched_at: str) -> dict:
         "source": "Yahoo Finance (unofficial chart data; direct daily research snapshot)",
         "accessedAt": fetched_at,
         "points": observations,
-        "_price_basis": "Adjusted close preferred per point when available; fallback to raw close (verify adjustment policy)",
+        "_price_basis": basis,
     }
 
 

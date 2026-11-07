@@ -86,6 +86,34 @@ class WalkforwardTests(unittest.TestCase):
         self.assertEqual(normalized["interval"], "1d")
         self.assertEqual(normalized["points"][0]["close"], 99.0)
         self.assertEqual(len(normalized["points"]), 1832)
+        self.assertEqual(normalized["_price_basis"], "adjusted close throughout series")
+        # Missing a single adjusted price MUST NOT splice raw data into the
+        # adjusted series. Fall back to one consistent raw series instead.
+        incomplete = {
+            "chart": {"result": [{
+                "timestamp": timestamps,
+                "indicators": {
+                    "quote": [{"close": [100.0 + i for i in range(1832)]}],
+                    "adjclose": [{"adjclose": [
+                        None if i == 100 else 99.0 + i for i in range(1832)
+                    ]}],
+                },
+            }], "error": None}
+        }
+        raw_only = parse_yahoo_daily(incomplete, "us", "2026-11-08T00:00:00Z")
+        self.assertEqual(raw_only["points"][0]["close"], 100.0)
+        self.assertEqual(raw_only["points"][100]["close"], 200.0)
+        self.assertIn("raw close throughout", raw_only["_price_basis"])
+        duplicated = {
+            "chart": {"result": [{
+                "timestamp": timestamps[:100] + [timestamps[99]] + timestamps[100:],
+                "indicators": {"quote": [{
+                    "close": [100.0] * (len(timestamps) + 1),
+                }]},
+            }], "error": None}
+        }
+        with self.assertRaisesRegex(ValueError, "duplicated"):
+            parse_yahoo_daily(duplicated, "us", "2026-11-08T00:00:00Z")
         parsed = parse_daily_payload(normalized, "us", "5y")
         self.assertEqual(len(parsed["observations"]), 1832)
         with self.assertRaisesRegex(ValueError, "plausible five-year"):
