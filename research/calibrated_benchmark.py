@@ -63,14 +63,28 @@ def run(
     thresholds = {model: select_threshold(
         model, callback[model], fit_end, test_start, annual_alert_budget
     ) for model in MODELS}
+    # Do not publish a "matched-budget" comparison if any detector fails
+    # to satisfy its calibration limit. This is a hard scientific gate.
+    unmet = [name for name, result in thresholds.items() if not result.budget_met]
+    if unmet:
+        raise ValueError(
+            "Shared calibration alert budget unmet for: " + ", ".join(unmet)
+        )
+
+    # Score alerts only on the holdout, but carry *state and cooldown* across
+    # the calibration/test boundary. Resetting each model at test_start would
+    # create different initial conditions and distort detection delays.
     alerts = {
-        "bcpd": threshold_alerts(
-            bcpd_probabilities, thresholds["bcpd"].threshold, test_start),
-        "rolling_variance": threshold_alerts(
-            variance_scores, thresholds["rolling_variance"].threshold, test_start),
-        "two_sided_cusum": cusum_alerts(
-            values, values[:fit_end], test_start,
-            threshold=thresholds["two_sided_cusum"].threshold),
+        "bcpd": [i for i in threshold_alerts(
+            bcpd_probabilities, thresholds["bcpd"].threshold, fit_end)
+            if i >= test_start],
+        "rolling_variance": [i for i in threshold_alerts(
+            variance_scores, thresholds["rolling_variance"].threshold, fit_end)
+            if i >= test_start],
+        "two_sided_cusum": [i for i in cusum_alerts(
+            values, values[:fit_end], fit_end,
+            threshold=thresholds["two_sided_cusum"].threshold)
+            if i >= test_start],
     }
     manifest_path = prices.with_suffix(".provenance.json")
     manifest = None
@@ -97,6 +111,7 @@ def run(
             "last_test_week": observations[-1][0],
             "prior_and_noise": "fixed on fit weeks only",
             "alert_thresholds": "selected on calibration weeks only, no event labels",
+            "test_state": "Sequential state and alert cooldown continue from the fit/calibration boundary; only post-test-boundary alerts are scored",
             "calibration_annual_alert_budget": annual_alert_budget,
             "variance_window_weeks": variance_window_weeks,
             "hazard_weeks": hazard_weeks, "event_tolerance_weeks": tolerance_weeks,

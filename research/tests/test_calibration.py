@@ -90,6 +90,13 @@ class CalibrationTests(unittest.TestCase):
                 self.assertIn(name, result["test_alert_counts"])
                 self.assertTrue(params["budget_met"])
 
+    def test_holdout_alerts_do_not_include_calibration_alarm_dates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            report = run(fixture_prices(Path(tmp)))
+            boundary = report["protocol"]["first_test_week"]
+            for model, dates in report["test_alerts"].items():
+                self.assertTrue(all(day >= boundary for day in dates), model)
+
     def test_provenance_hash_mismatch_refuses_to_analyze(self):
         with tempfile.TemporaryDirectory() as tmp:
             price_path = fixture_prices(Path(tmp))
