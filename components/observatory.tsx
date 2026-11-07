@@ -7,7 +7,7 @@ import { BrandFooter } from "@/components/brand-footer";
 import {
   ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen,
   Check, ChevronRight, CircleAlert, Crosshair, Database, Fingerprint,
-  Globe2, RotateCw, ScanLine, ShieldCheck, SlidersHorizontal,
+  Globe2, RotateCw, ScanLine, ShieldCheck, SlidersHorizontal, FlaskConical,
   Waves, type LucideIcon,
 } from "lucide-react";
 import {
@@ -211,6 +211,7 @@ export function Observatory() {
       <div className="ob-rail-divider"/>
       <nav className="ob-rail-links">
         <Link href="/" aria-current="page" className="ob-rail-link selected" title="Observatory"><Glyph icon={Crosshair}/><span>Observatory</span></Link>
+        <Link href="/forecast" className="ob-rail-link" title="Forecast Lab"><Glyph icon={FlaskConical}/><span>Forecast Lab</span></Link>
         <Link href="/research" className="ob-rail-link" title="Research studio"><Glyph icon={SlidersHorizontal}/><span>Research studio</span></Link>
         <Link href="/methodology" className="ob-rail-link" title="Methodology"><Glyph icon={BookOpen}/><span>Methodology</span></Link>
         <Link href="/privacy" className="ob-rail-link" title="Data practices"><Glyph icon={ShieldCheck}/><span>Data practices</span></Link>
@@ -239,6 +240,7 @@ export function Observatory() {
             <div className="ob-intro-actions">
               <a className="ob-button ob-button-primary" href="#ob-observation"><Crosshair size={16}/> EXPLORE THE DATA <ArrowRight size={16}/></a>
               <Link className="ob-button ob-button-quiet" href="/research">ADVANCED RESEARCH STUDIO <ArrowUpRight size={16}/></Link>
+              <Link className="ob-button ob-button-quiet" href="/forecast">FORECAST LAB <ArrowUpRight size={16}/></Link>
             </div>
           </div>
           <div className="ob-intro-instrument" aria-label="Research instrument illustration, not live measurement">

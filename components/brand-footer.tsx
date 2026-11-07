@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, ArrowUp, BookOpen, Github, Layers3, ShieldCheck, Waves } from "lucide-react";
+import { ArrowUpRight, ArrowUp, BookOpen, Github, Layers3, ShieldCheck, Waves, FlaskConical } from "lucide-react";
 import { HuLaXCredit } from "./hulax-credit";
 
 type BrandFooterProps = {
@@ -25,6 +25,7 @@ export function BrandFooter({ studio = false }: BrandFooterProps) {
             <h2>EXPLORE</h2>
             <Link href="/"><Layers3 size={15} aria-hidden="true" /> The Observatory</Link>
             <Link href="/research"><BookOpen size={15} aria-hidden="true" /> Research Studio</Link>
+            <Link href="/forecast"><FlaskConical size={15} aria-hidden="true" /> Forecast Lab</Link>
             <Link href="/methodology">Our methodology <ArrowUpRight size={13} aria-hidden="true" /></Link>
             <Link href="/privacy">Data practices <ArrowUpRight size={13} aria-hidden="true" /></Link>
           </nav>
