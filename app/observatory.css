@@ -463,3 +463,14 @@
 @media(prefers-reduced-motion:reduce){
   .hlx-credit *, .hlx-footer *{transition:none!important}
 }
+
+/* Shared branding also appears on methodology/privacy pages. */
+.hlx-info-shell{min-height:100vh;background:#08131e;color:#eaf3fb}
+.hlx-info-shell .info-page{min-height:auto}
+.hlx-info-shell .info-nav{justify-content:space-between;gap:20px}
+.hlx-info-shell .info-nav .hlx-credit{margin-left:auto}
+.hlx-info-shell .hlx-footer{margin-top:12px}
+@media(max-width:650px){
+  .hlx-info-shell .info-nav>span{display:none}
+  .hlx-info-shell .info-nav .hlx-credit{margin-left:auto}
+}

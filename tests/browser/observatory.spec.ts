@@ -73,3 +73,31 @@ test("mobile layout remains within viewport and advanced studio is preserved", a
   await expect(page).toHaveURL(/\/research$/);
   await expect(page.getByText("RESEARCH INTELLIGENCE")).toBeVisible();
 });
+
+test("HuLaX project-family identity is linked consistently across pages", async ({page}) => {
+  const pages = ["/", "/research", "/methodology", "/privacy"];
+  for (const route of pages) {
+    await page.goto(route);
+    const headerCredit = page.getByRole("link", {
+      name: /A Project By HuLaX.*portfolio/i,
+    }).first();
+    await expect(headerCredit).toBeVisible();
+    await expect(headerCredit).toHaveAttribute("href", "https://hulax.vercel.app");
+    const footer = page.getByRole("contentinfo",{name:"BCPD One footer"});
+    await expect(footer).toBeVisible();
+    await expect(footer.getByRole("navigation",{name:"Explore BCPD One"})).toBeVisible();
+    await expect(footer.getByRole("link",{name:/Creator portfolio/i})).toHaveAttribute("href","https://hulax.vercel.app");
+    await expect(footer.getByRole("link",{name:/BACK TO TOP/i})).toBeVisible();
+  }
+});
+
+test("mobile HuLaX credit and footer do not overflow narrow screens", async ({page}) => {
+  await page.setViewportSize({width:375,height:812});
+  await page.goto("/");
+  await expect(page.locator(".ob-topbar .hlx-credit")).toBeVisible();
+  await expect(page.locator(".hlx-footer-panel")).toBeVisible();
+  const hasOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 2,
+  );
+  expect(hasOverflow).toBeFalsy();
+});

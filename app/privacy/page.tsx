@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { BrandFooter } from "@/components/brand-footer";
+import { HuLaXCredit } from "@/components/hulax-credit";
+import "../observatory.css";
 export const metadata = {
   title: "Data & Privacy | BCPD One",
   description: "Transparent overview of where BCPD One processes local research data."
 };
 export default function PrivacyPage(){
- return <main className="info-page"><header className="info-nav"><Link href="/">← BCPD ONE / WORKSPACE</Link><span>DATA PRACTICES</span></header>
+ return <div className="hlx-info-shell" id="top"><main className="info-page"><header className="info-nav"><Link href="/">← BCPD ONE / WORKSPACE</Link><span>DATA PRACTICES</span><HuLaXCredit /></header>
   <div className="info-hero"><p className="section-kicker">PRIVACY / LOCAL RESEARCH WORKSPACES</p><h1>Your research settings.<br/><em>Under your control.</em></h1>
     <p>This page describes the current application&apos;s implementation, not a substitute for a legal privacy policy or service agreement.</p></div>
   <div className="info-grid">
@@ -15,6 +18,5 @@ export default function PrivacyPage(){
     <article className="info-card"><h2>Exports and deletion</h2><p>Exports are generated locally when you click the export controls. You choose where to store and share them. Delete saved presets in the workspace or clear the browser&apos;s site data.</p></article>
     <article className="info-card"><h2>Limits</h2><p>Local storage is not encryption or cloud backup. Multi-user security, access control, provider licensing, privacy governance and legal compliance reviews are required before onboarding organizations.</p></article>
   </div><div className="info-banner"><h2>Transparency improves research quality.</h2><p>For the complete source code, see the repository. This experimental product does not offer investment advice.</p><Link href="/">BACK TO RESEARCH →</Link></div>
-  <footer className="info-footer"><Link href="/methodology">Read methodology</Link><a href="https://github.com/HuLaxx/BCPD">GitHub source</a></footer>
- </main>;
+ </main><BrandFooter studio /></div>;
 }

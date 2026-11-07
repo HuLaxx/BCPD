@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { BrandFooter } from "@/components/brand-footer";
+import { HuLaXCredit } from "@/components/hulax-credit";
+import "../observatory.css";
 export const metadata = {
   title: "Methodology | BCPD One",
   description: "Methodology, provenance, assumptions and reproducibility for the BCPD One research platform."
@@ -12,12 +15,11 @@ const sections=[
   ["06 / Honest limitations","The model estimates observation variance from the full return sample and a prior mean from initial observations. This introduces hindsight and does not constitute a leakage-free online forecast. Alternative models, academic source snapshots and walk-forward benchmarks are required before scientific validation."]
 ];
 export default function MethodologyPage(){
- return <main className="info-page"><header className="info-nav"><Link href="/">← BCPD ONE / WORKSPACE</Link><span>SCIENTIFIC METHODS</span></header>
+ return <div className="hlx-info-shell" id="top"><main className="info-page"><header className="info-nav"><Link href="/">← BCPD ONE / WORKSPACE</Link><span>SCIENTIFIC METHODS</span><HuLaXCredit /></header>
   <div className="info-hero"><p className="section-kicker">RESEARCH TRANSPARENCY / V1</p><h1>What the model measures.<br/><em>And what it doesn’t.</em></h1>
   <p>Every chart should have a traceable observation, a documented model assumption and an honest limit on interpretation.</p></div>
   <div className="info-grid">{sections.map(([title,desc])=><article className="info-card" key={title}><h2>{title}</h2><p>{desc}</p></article>)}</div>
   <section className="info-banner"><h2>Reproducibility is an operating principle.</h2><p>Export a source-attributed CSV or a research JSON report from the workspace. A report includes model parameters, candidate peaks, observation dates, weekly returns, source labels and retrieval times. Reported source labels do not grant redistribution rights.</p>
     <Link href="/">OPEN RESEARCH WORKSPACE →</Link></section>
-  <footer className="info-footer"><Link href="/privacy">Privacy and local storage</Link><a href="https://github.com/HuLaxx/BCPD">GitHub source</a></footer>
- </main>;
+ </main><BrandFooter studio /></div>;
 }
