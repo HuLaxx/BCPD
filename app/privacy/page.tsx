@@ -3,6 +3,7 @@ import { BrandFooter } from "@/components/brand-footer";
 import { HuLaXCredit } from "@/components/hulax-credit";
 import "../observatory.css";
 export const metadata = {
+  alternates: { canonical: "/privacy" },
   title: "Data & Privacy | BCPD One",
   description: "Transparent overview of where BCPD One processes local research data."
 };

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ResearchWorkbench } from "@/components/research-workbench";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/research" },
   title: "Research Studio | BCPD One",
   description: "A detailed historical analysis workbench with CSV import, model settings, sensitivity diagnostics, correlation and export tools.",
 };

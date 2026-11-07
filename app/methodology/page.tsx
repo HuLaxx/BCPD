@@ -3,6 +3,7 @@ import { BrandFooter } from "@/components/brand-footer";
 import { HuLaXCredit } from "@/components/hulax-credit";
 import "../observatory.css";
 export const metadata = {
+  alternates: { canonical: "/methodology" },
   title: "Methodology | BCPD One",
   description: "Methodology, provenance, assumptions and reproducibility for the BCPD One research platform."
 };
