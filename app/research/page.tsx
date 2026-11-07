@@ -1,4 +1,5 @@
 import Link from "next/link";
+import "../observatory.css";
 import type { Metadata } from "next";
 import { ResearchWorkbench } from "@/components/research-workbench";
 

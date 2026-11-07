@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  Activity, ArrowDownToLine, ArrowRight, ArrowUpRight, BarChart3, BookOpen,
-  Check, ChevronRight, CircleAlert, Clock3, Crosshair, Database, Fingerprint,
-  Globe2, Layers3, RotateCw, ScanLine, ShieldCheck, SlidersHorizontal,
+  ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen,
+  Check, ChevronRight, CircleAlert, Crosshair, Database, Fingerprint,
+  Globe2, RotateCw, ScanLine, ShieldCheck, SlidersHorizontal,
   Waves, type LucideIcon,
 } from "lucide-react";
 import {
@@ -200,6 +200,7 @@ export function Observatory() {
   const selectedCandidate=summary?.ledger.find(x=>x.week===focusedWeek)??summary?.ledger[0]??null;
   const liveLabel=study?"HISTORICAL DATA LOADED":current?.error?"SOURCE ERROR":"RETRIEVING HISTORY";
   const change=(id:string)=>{setActiveId(id);setFocusedWeek(null);};
+  const reload=()=>{setResponse(null);setRetry(v=>v+1);};
   const exportReady=!!study;
   return <div className="ob-page">
     <a className="ob-skip" href="#ob-main">Skip to research content</a>
@@ -212,7 +213,7 @@ export function Observatory() {
         <Link href="/methodology" className="ob-rail-link" title="Methodology"><Glyph icon={BookOpen}/><span>Methodology</span></Link>
         <Link href="/privacy" className="ob-rail-link" title="Data practices"><Glyph icon={ShieldCheck}/><span>Data practices</span></Link>
       </nav>
-      <div className="ob-rail-bottom"><span className="ob-rail-coordinate">51° 03′ N</span><span>RESEARCH<br/>DESK / 01</span></div>
+      <div className="ob-rail-bottom"><span className="ob-rail-coordinate">FIELD / 001</span><span>RESEARCH<br/>DESK / 01</span></div>
     </aside>
     <div className="ob-shell" id="ob-main">
       <header className="ob-topbar">
@@ -270,7 +271,7 @@ export function Observatory() {
                   <div className="ob-segment" role="group" aria-label="History period">
                     {(["1y","2y"] as Period[]).map(value=><button key={value} type="button" aria-pressed={period===value} className={period===value?"selected":""} onClick={()=>{setPeriod(value);setFocusedWeek(null)}}>{value.toUpperCase()}</button>)}
                   </div>
-                  <button type="button" className="ob-reload" aria-label="Reload market observations" title="Reload observed history" onClick={()=>setRetry(p=>p+1)}><RotateCw size={17}/></button>
+                  <button type="button" className="ob-reload" aria-label="Reload market observations" title="Reload observed history" onClick={reload}><RotateCw size={17}/></button>
                 </div>
               </div>
 
@@ -290,7 +291,7 @@ export function Observatory() {
                   </div>
                 </div>
                 {study?<Plot study={study} mode={mode} selectedWeek={selectedCandidate?.week??null}/>:
-                  <EmptyPanel loading={busy} error={current?.error} retry={()=>setRetry(v=>v+1)}/>}
+                  <EmptyPanel loading={busy} error={current?.error} retry={reload}/>}
                 <div className="ob-chart-note"><CircleAlert size={15}/><span>{NOTES[mode]}</span></div>
               </div>
 

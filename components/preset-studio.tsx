@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { BookmarkPlus, Check, Download, FolderOpen, Trash2 } from "lucide-react";
 import {
   makePreset, parsePresetLibrary, PRESET_STORAGE_KEY,
@@ -12,25 +12,32 @@ type Props = {
   onApply: (config: StudyConfig) => void;
 };
 
+const PRESETS_CHANGED = "bcpd-one-presets-changed";
+function subscribePresets(onChange:()=>void):()=>void{
+  window.addEventListener("storage",onChange);
+  window.addEventListener(PRESETS_CHANGED,onChange);
+  return ()=>{
+    window.removeEventListener("storage",onChange);
+    window.removeEventListener(PRESETS_CHANGED,onChange);
+  };
+}
+function getPresets():string {
+  try {return window.localStorage.getItem(PRESET_STORAGE_KEY)??"[]";}
+  catch{return "[]";}
+}
+function getServerPresets():string {return "[]";}
+
 export function PresetStudio({ config, onApply }: Props) {
   const [name, setName] = useState("");
-  const [presets, setPresets] = useState<StudyPreset[]>([]);
+  const snapshot=useSyncExternalStore(subscribePresets,getPresets,getServerPresets);
+  const presets:StudyPreset[]=parsePresetLibrary(snapshot);
   const [message, setMessage] = useState("");
   const [storageAvailable, setStorageAvailable] = useState(true);
-
-  useEffect(() => {
-    try {
-      setPresets(parsePresetLibrary(window.localStorage.getItem(PRESET_STORAGE_KEY)));
-    } catch {
-      setStorageAvailable(false);
-      setMessage("Browser storage is unavailable. Presets cannot be saved here.");
-    }
-  }, []);
 
   function persist(items: StudyPreset[]) {
     try {
       window.localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(items));
-      setPresets(items);
+      window.dispatchEvent(new Event(PRESETS_CHANGED));
     } catch {
       setStorageAvailable(false);
       setMessage("Unable to save: browser storage is blocked or full.");

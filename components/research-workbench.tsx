@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   Activity, ArrowDownToLine, ArrowRight, BarChart3, BookOpen, Check, CircleAlert,
   Database, FileUp, GitBranch, Globe2, Layers3, RefreshCw, ShieldCheck, SlidersHorizontal, Waves
@@ -165,10 +166,10 @@ export function ResearchWorkbench() {
 
   return <div className="app-frame">
     <aside className="nav-rail">
-      <a href="/" className="logo-lockup" aria-label="BCPD One home">
+      <Link href="/" className="logo-lockup" aria-label="BCPD One home">
         <span className="logo-mark"><Waves size={23} strokeWidth={2.4}/></span>
         <span className="logo-wordmark">BCPD <b>ONE</b><small>RESEARCH INTELLIGENCE</small></span>
-      </a>
+      </Link>
       <div className="nav-caption">WORKSPACE</div>
       <nav className="primary-nav" aria-label="Main navigation">
         <a className="nav-active" href="#overview"><BarChart3 size={17}/> Research overview</a>
@@ -307,10 +308,10 @@ export function ResearchWorkbench() {
         </section>
 
         <section className="methodology-strip"><div className="method-icon"><ShieldCheck size={22}/></div><div><strong>Scientific clarity is a feature, not a footnote.</strong>
-          <p>The Gaussian mean-shift BOCPD model uses whole-sample variance and a first-observation prior. Results are retrospective; nine-setting sensitivity is parameter agreement, not prediction confidence. Yahoo Finance is an unofficial historical source, and free APIs may fail. Imported files are processed client-side. <a className="inline-link" href="/methodology">Read the full methodology.</a></p></div>
+          <p>The Gaussian mean-shift BOCPD model uses whole-sample variance and a first-observation prior. Results are retrospective; nine-setting sensitivity is parameter agreement, not prediction confidence. Yahoo Finance is an unofficial historical source, and free APIs may fail. Imported files are processed client-side. <a className="inline-link" href="/methodology">Read the full methodology.</Link></p></div>
           <a href="https://github.com/HuLaxx/BCPD" target="_blank" rel="noopener noreferrer">REPRODUCIBLE SOURCE <ArrowRight size={17}/></a></section>
       </main>
-      <footer className="workspace-footer"><span>© BCPD ONE · BAYESIAN CHANGE-POINT RESEARCH</span><span><a href="/methodology">METHODOLOGY</a> · <a href="/privacy">PRIVACY</a> · NOT INVESTMENT ADVICE</span></footer>
+      <footer className="workspace-footer"><span>© BCPD ONE · BAYESIAN CHANGE-POINT RESEARCH</span><span><Link href="/methodology">METHODOLOGY</Link> · <Link href="/privacy">PRIVACY</Link> · NOT INVESTMENT ADVICE</span></footer>
     </div>
   </div>;
 }
