@@ -12,12 +12,18 @@ import { completedWeeklyCloses, displayNumber } from "@/lib/observatory-view";
 import { ASSETS, type Asset } from "@/lib/universe";
 import {
   projectWeeklyPrices, backtestWeeklyForecast,
-  type ForecastMethod, type ForecastResult, type BacktestAggregate,
+  type ForecastMethod, type ForecastResult, type ForecastBacktest, type BacktestAggregate,
 } from "@/lib/forecasting";
 
 type Horizon=1|4|12|26;
 type Loaded={assetId:string;returns?:ReturnPoint[];source?:string;accessedAt?:string;error?:string};
 const HORIZONS:readonly Horizon[]=[1,4,12,26];
+type Computation={
+  forecast:ForecastResult;
+  test:ForecastBacktest;
+  selected?:BacktestAggregate;
+  benchmark?:BacktestAggregate;
+};
 function svgPath(ps:readonly [number,number][]):string{
   return ps.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+","+p[1].toFixed(2)).join(" ");
 }
@@ -98,7 +104,7 @@ export function ForecastLab(){
     void load();return ()=>controller.abort();
   },[assetId,retry]);
   const current=state?.assetId===assetId?state:null;
-  const outcome=useMemo(()=>{
+  const outcome=useMemo<Computation | {error:string} | null>(()=>{
     if(!current?.returns)return null;
     try{
       const forecast=projectWeeklyPrices(current.returns,horizon,model);
@@ -115,13 +121,13 @@ export function ForecastLab(){
   const reload=()=>{setState(null);setRetry(x=>x+1);};
   function exportForecast(){
     if(!computed||!current)return;
-    const document={
+    const researchReport={
       schema:"bcpd-one.forecast-report.v1",generatedAt:new Date().toISOString(),
       provenance:{assetId,source:current.source,accessedAt:current.accessedAt},
       model:computed.forecast,backtest:computed.test,
       limitations:"Exploratory forward prices. Not independently validated, calibrated, investment advice or a prediction of regime-change date.",
     };
-    const url=URL.createObjectURL(new Blob([JSON.stringify(document,null,2)],{type:"application/json"}));
+    const url=URL.createObjectURL(new Blob([JSON.stringify(researchReport,null,2)],{type:"application/json"}));
     const a=document.createElement("a");
     a.href=url;a.download="bcpd-"+assetId+"-forecast-research.json";a.click();
     window.setTimeout(()=>URL.revokeObjectURL(url),1000);
