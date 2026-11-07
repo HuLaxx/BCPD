@@ -77,3 +77,7 @@ A new `research/calibrated_benchmark.py` command separates **model fit** (first 
 `research/market_snapshot.py` retrieves source-attributed **daily** data from the existing BCPD One API and writes private CSV plus metadata/CSV hash to local disk. Weekly provider bars from the five-year endpoint are refused because aggregate-bar timestamps may not equal observation close dates. The first successful live data spot-checks yielded 104 weekly returns each for the S&P 500, Bitcoin and Nifty 50; this is an input-validation result, not model validation.
 
 We still require a green external runner, full Python audit execution, independent event references, and an actual comparison at similar **held-out false-alarm rates** before making any superiority claim.
+
+## Strict release gates
+
+See [RELEASE_GATES.md](RELEASE_GATES.md) before making scientific claims, merging the research branch or publishing upgraded detection results. The event-scoring implementation now uses causal maximum-cardinality / minimum-delay matching; the test state and cooldown continue across the calibration/holdout boundary, and an unmet shared calibration budget blocks evaluation. Full CI remains unavailable, so this branch is **not release approved**.
