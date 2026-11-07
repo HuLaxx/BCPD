@@ -56,3 +56,17 @@ An event source must cite an independent reference. The evaluation requires at l
 5. Train/test/validation split rules, random seeds, evaluation event timestamps, and recorded uncertainty estimates.
 
 Do not commit copyrighted thesis pages, redistributable restricted market datasets or private research assets to the public repo without permission. Transfer sensitive originals privately and keep public GitHub limited to code, non-sensitive metadata, and permitted reproducibility artifacts.
+
+## Beyond-dissertation experiments (new)
+
+This independent protocol now compares **Gaussian BOCPD**, a **rolling variance ratio**, and **two-sided CUSUM** (a mean-shift baseline) on chronological held-out weeks. Event matching never credits an alert that precedes the labeled event, and completely missed event sets count as zero F1.
+
+Run a deterministic six-scenario research **stress suite**; no market downloads or external packages are required:
+
+~~~bash
+python -m research.stress_test --seeds 3 --out artifacts/synthetic-stress.json
+~~~
+
+The suite includes known abrupt mean, volatility and combined shifts, plus no-shift, outlier, and gradual-drift negative controls. It reports seeded detection metrics and false alarms. **All synthetic observations are explicitly labeled as such and are not dissertation or real-market results.**
+
+See [BEYOND_DISSERTATION.md](BEYOND_DISSERTATION.md) for limitations and next-stage evaluation standards.
