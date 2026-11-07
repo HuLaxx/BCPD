@@ -97,11 +97,11 @@ def read_event_labels(path: Path) -> list[tuple[str, str]]:
 
 
 def event_metrics(alerts: list[int], events: list[int], tolerance_weeks: int = 2) -> dict:
-    """One-to-one event matching. Directional delay is reported, never a p-value."""
+    """Credit only alerts on/after an event, within tolerance. One-to-one."""
     if tolerance_weeks < 0 or tolerance_weeks > 12:
         raise ValueError("tolerance must be between 0 and 12")
-    pairs = sorted(((abs(a - e), a, e) for a in alerts for e in events
-                    if abs(a - e) <= tolerance_weeks))
+    pairs = sorted(((a - e, a, e) for a in alerts for e in events
+                    if 0 <= a - e <= tolerance_weeks))
     used_alerts, used_events, delays = set(), set(), []
     for _, a, e in pairs:
         if a not in used_alerts and e not in used_events:
@@ -111,7 +111,8 @@ def event_metrics(alerts: list[int], events: list[int], tolerance_weeks: int = 2
     tp = len(delays)
     precision = tp / len(alerts) if alerts else 0.0
     recall = tp / len(events) if events else None
-    f1 = 2 * precision * recall / (precision + recall) if recall is not None and precision + recall else None
+    f1 = (None if recall is None else
+          2 * precision * recall / (precision + recall) if precision + recall else 0.0)
     return {"alerts": len(alerts), "events": len(events), "matched": tp,
             "precision": precision, "recall": recall, "f1": f1,
             "false_alarms": len(alerts) - tp,

@@ -43,6 +43,15 @@ class ReproductionProtocolTests(unittest.TestCase):
         self.assertEqual(a, b[:-1])
         self.assertTrue(all(x is None for x in a[:11]))
 
+    def test_missing_every_event_is_zero_f1_and_early_alarms_are_false(self):
+        early = event_metrics([19], [20], 2)
+        self.assertEqual(early["matched"], 0)
+        self.assertEqual(early["f1"], 0.0)
+        self.assertEqual(early["false_alarms"], 1)
+        late = event_metrics([21], [20], 2)
+        self.assertEqual(late["matched"], 1)
+        self.assertEqual(late["signed_detection_delay_weeks"], [1])
+
     def test_event_matching_is_one_to_one(self):
         scores = event_metrics([19, 20, 21, 40], [20, 40], 2)
         self.assertEqual(scores["matched"], 2)
