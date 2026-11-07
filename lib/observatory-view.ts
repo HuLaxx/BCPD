@@ -1,4 +1,6 @@
 import type { Study } from "./analysis";
+import { weeklyCloses, type PricePoint, type WeeklyPoint } from "./analysis";
+
 
 export type TraceMode = "close" | "return" | "reset";
 export type ObservatoryPoint = {
@@ -96,4 +98,20 @@ export function displayNumber(value: number, digits = 2): string {
   return Number.isFinite(value)
     ? value.toLocaleString("en-US", { maximumFractionDigits: digits, minimumFractionDigits: digits })
     : "—";
+}
+
+/** Exclude in-progress Saturday-ending UTC weeks from a dated provider snapshot. */
+export function completedWeeklyCloses(points: PricePoint[], accessedAt: string): WeeklyPoint[] {
+  const stamp = new Date(accessedAt);
+  if (!Number.isFinite(stamp.getTime()) || !/(Z|[+-]\\d{2}:\\d{2})$/.test(accessedAt)) {
+    throw new Error("A timezone-aware source retrieval timestamp is required.");
+  }
+  const asof = stamp.toISOString().slice(0, 10);
+  const asofDay = stamp.getUTCDay();
+  const daysSinceSaturday = (asofDay - 6 + 7) % 7 || 7;
+  const lastSaturday = new Date(Date.UTC(
+    stamp.getUTCFullYear(), stamp.getUTCMonth(), stamp.getUTCDate() - daysSinceSaturday,
+  )).toISOString().slice(0, 10);
+  return weeklyCloses(points.filter(point => point.date <= asof))
+    .filter(point => point.weekEnd <= lastSaturday);
 }

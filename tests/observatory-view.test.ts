@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { candidateLedger, observedTrace, traceGeometry } from "../lib/observatory-view";
+import { candidateLedger, completedWeeklyCloses, observedTrace, traceGeometry } from "../lib/observatory-view";
 import { ASSETS } from "../lib/universe";
 import type { Study } from "../lib/analysis";
 
@@ -56,4 +56,18 @@ test("invalid or missing observations are rejected, not silently guessed", () =>
     ...sample, returns: sample.returns.map((r, i) => i === 1 ? {...r, close: -1} : r),
   }), /invalid data/);
   assert.deepEqual(traceGeometry([], "reset").line, "");
+});
+
+test("unfinished market weeks never enter the visible analysis", () => {
+  const prices = [
+    {date: "2026-10-30", close: 100},
+    {date: "2026-10-31", close: 101},
+    {date: "2026-11-03", close: 102},
+    {date: "2026-11-07", close: 103},
+  ];
+  const onSaturday = completedWeeklyCloses(prices, "2026-11-07T18:00:00Z");
+  const onSunday = completedWeeklyCloses(prices, "2026-11-08T00:00:00Z");
+  assert.deepEqual(onSaturday.map(x => x.weekEnd), ["2026-10-31"]);
+  assert.deepEqual(onSunday.map(x => x.weekEnd), ["2026-10-31", "2026-11-07"]);
+  assert.throws(() => completedWeeklyCloses(prices, "2026-11-07T18:00:00"), /timezone-aware/);
 });
