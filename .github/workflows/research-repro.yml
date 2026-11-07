@@ -81,3 +81,25 @@ jobs:
           PY
       # Provider-dependent and explicitly NON-GATING. No third-party raw prices
       # are uploaded as artifacts. Revert this job to manual-only after audit.
+
+  synthetic-signal-quality:
+    name: Seeded signal quality & negative controls (SYNTHETIC ONLY)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Evaluate 20 seeded scenarios per type without market data
+        run: |
+          python -m research.signal_quality_probe --seeds 20 --out /tmp/bcpd-synthetic-signal-quality.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result=json.loads(Path("/tmp/bcpd-synthetic-signal-quality.json").read_text())
+          assert result["verified_real_market_accuracy"] is False
+          assert result["not_a_scientific_superiority_claim"] is True
+          assert result["seeds"] == 20
+          print("SYNTHETIC ONLY, not verified financial market event accuracy.")
+          PY
