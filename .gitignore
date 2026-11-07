@@ -5,3 +5,10 @@ out/
 .env*
 !.env.example
 .DS_Store
+
+# Locally captured research input data and generated audit outputs (do not publish vendor data)
+local-data/
+artifacts/
+research/artifacts/
+__pycache__/
+*.pyc

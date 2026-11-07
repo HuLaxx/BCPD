@@ -69,3 +69,11 @@ A credible successor should demonstrate improvements over a **matched baseline a
 These sources motivate a scientific protocol; they are not evidence that our code reproduces their experimental results.
 
 **Status:** research prototype, not a production trading strategy or a validated dissertation reproduction.
+
+## Validation milestone: leakage-aware calibration
+
+A new `research/calibrated_benchmark.py` command separates **model fit** (first 50%), **threshold calibration** (next 20%), and **held-out test** (last 30%). All three algorithms are constrained to a shared calibration-period alert *count* budget. Without event ground truth, the resulting alerts cannot be categorized as true/false positives.
+
+`research/market_snapshot.py` retrieves source-attributed **daily** data from the existing BCPD One API and writes private CSV plus metadata/CSV hash to local disk. Weekly provider bars from the five-year endpoint are refused because aggregate-bar timestamps may not equal observation close dates. The first successful live data spot-checks yielded 104 weekly returns each for the S&P 500, Bitcoin and Nifty 50; this is an input-validation result, not model validation.
+
+We still require a green external runner, full Python audit execution, independent event references, and an actual comparison at similar **held-out false-alarm rates** before making any superiority claim.

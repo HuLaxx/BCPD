@@ -70,3 +70,29 @@ python -m research.stress_test --seeds 3 --out artifacts/synthetic-stress.json
 The suite includes known abrupt mean, volatility and combined shifts, plus no-shift, outlier, and gradual-drift negative controls. It reports seeded detection metrics and false alarms. **All synthetic observations are explicitly labeled as such and are not dissertation or real-market results.**
 
 See [BEYOND_DISSERTATION.md](BEYOND_DISSERTATION.md) for limitations and next-stage evaluation standards.
+
+## Daily market capture and fair calibration (new validation milestone)
+
+The existing BCPD One production market API returned real-provider daily histories for the 2-year window when checked in November 2026: 501 S&P 500, 731 Bitcoin, and 495 Nifty 50 price records. They align to 104 weekly log returns per market, with no repeated dates or non-finite returns. This **input readiness check is not an event-detection performance result** and raw API histories were not committed.
+
+Capture a fresh daily-dated local source snapshot, preserve its provenance, then run a three-way model comparison:
+
+~~~bash
+python -m research.market_snapshot --asset us --range 2y --out-dir local-data
+python -m research.market_snapshot --asset btc --range 2y --out-dir local-data
+python -m research.market_snapshot --asset in --range 2y --out-dir local-data
+
+python -m research.calibrated_benchmark --prices local-data/us-2y.csv --out artifacts/us-audit.json
+python -m research.calibrated_benchmark --prices local-data/btc-2y.csv --out artifacts/btc-audit.json
+python -m research.calibrated_benchmark --prices local-data/in-2y.csv --out artifacts/in-audit.json
+~~~
+
+**Leakage controls:** By default, the earliest 50% of observed weekly returns fit Gaussian BOCPD and CUSUM parameters; the next 20% calibrate thresholds against a declared *unlabeled alert budget* (six alerts per 52 weeks); and the last 30% remain an untouched test block. Each detector searches a fixed candidate-threshold grid and chooses the most sensitive threshold that meets the same calibration-period alert budget. BOCPD updates are sequential and use no future return in the posterior step; its fixed prior and observation variance use only the fit partition. CUSUM restarts its decision statistic at the held-out boundary.
+
+A missing labeled event file means the audit reports model configurations, alarm counts and data provenance, **not false-positive rates, precision, recall or F1**. Do not equate this with event-detection validation. Labels must come from independently documented sources and are not used to pick thresholds.
+
+This protocol refuses the current five-year weekly-bar API mode because the provider may date weekly aggregate prices at the start of the week. For five-year evaluation, obtain daily-dated, authorized price snapshots or independently verify each weekly bar's actual close date. Never copy restricted data into this public repository.
+
+The Python test suite now has additional cases for calibration-window isolation, source hashing, provenance rejection, and explicit unverified reports. Run locally: `python -m unittest discover -s research/tests -v`.
+
+**CI infrastructure blocker:** The latest GitHub Actions checks ended within seconds with no execution steps or runner assigned, so those failures do not establish a Python or Next.js test failure. See [CI_RUNNER_DIAGNOSTIC.md](CI_RUNNER_DIAGNOSTIC.md) for account/run-configuration checks. Production remains untouched by this draft PR.

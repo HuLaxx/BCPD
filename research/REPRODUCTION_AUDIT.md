@@ -31,3 +31,15 @@ This table separates a **portfolio narrative**, **code existing in BCPD One**, a
 - [ ] Publish only independently verified findings and amend portfolio language as needed.
 
 **Decision gate:** Do not publish a claim of “35% improvement”, “dissertation reproduction”, or “real-time validated” on the strength of this independent protocol alone.
+
+## November 2026 validation update
+
+- [x] Captured **API-level evidence** that daily 2-year provider responses for S&P 500 (501), Bitcoin (731) and Nifty 50 (495) can be aligned into 104 finite weekly log returns each; no model accuracy yet.
+- [x] Implemented three-way fit/validation/test protocol and equal **calibration-period alert count** budgets (not a claim of equal false-positive rates).
+- [x] Implemented local-only daily snapshot capture, SHA-256 sidecars and source-interval/date validation. Actual downloaded datasets are excluded from Git.
+- [ ] Run the updated Python tests in a functioning execution environment; GitHub Actions fails before any runner step.
+- [ ] Preserve authorized real market snapshots and execute the Python comparator on them.
+- [ ] Acquire independently sourced held-out event labels; otherwise statistical detection F1 and false-alarm rates are undefined.
+- [ ] Benchmark multiple disjoint market regimes, uncertainty, parameter robustness and cross-provider consistency.
+
+**Do not interpret successful provider health checks or unlabeled alerts as a measured improvement over any baseline.**
