@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {weeklyCloses,logReturns,variance,matchPeaks,parseMarketCSV} from '../site/research.mjs';
-import {normalizeYahoo,normalizeCoinGecko} from '../api/markets.js';
+import {normalizeYahoo,normalizeCoinGecko} from '../lib/market-provider.js';
 test('stocks and crypto use the same week ends without filling missing days',()=>{
  const rows=[{date:'2026-09-10',close:100},{date:'2026-09-11',close:110},{date:'2026-09-12',close:120},{date:'2026-09-14',close:130}];
  const x=weeklyCloses(rows);assert.equal(x.length,2);assert.equal(x[0].close,120);assert.equal(x[0].weekEnd,'2026-09-12');
