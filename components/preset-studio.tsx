@@ -12,32 +12,35 @@ type Props = {
   onApply: (config: StudyConfig) => void;
 };
 
-const PRESETS_CHANGED = "bcpd-one-presets-changed";
-function subscribePresets(onChange:()=>void):()=>void{
-  window.addEventListener("storage",onChange);
-  window.addEventListener(PRESETS_CHANGED,onChange);
-  return ()=>{
-    window.removeEventListener("storage",onChange);
-    window.removeEventListener(PRESETS_CHANGED,onChange);
+const PRESETS_UPDATED_EVENT = "bcpd-one-presets-updated";
+
+function subscribePresets(notify: () => void): () => void {
+  window.addEventListener("storage", notify);
+  window.addEventListener(PRESETS_UPDATED_EVENT, notify);
+  return () => {
+    window.removeEventListener("storage", notify);
+    window.removeEventListener(PRESETS_UPDATED_EVENT, notify);
   };
 }
-function getPresets():string {
-  try {return window.localStorage.getItem(PRESET_STORAGE_KEY)??"[]";}
-  catch{return "[]";}
+
+function readPresetsSnapshot(): string {
+  try { return window.localStorage.getItem(PRESET_STORAGE_KEY) ?? "[]"; }
+  catch { return "[]"; }
 }
-function getServerPresets():string {return "[]";}
+
+function serverPresetsSnapshot(): string { return "[]"; }
 
 export function PresetStudio({ config, onApply }: Props) {
   const [name, setName] = useState("");
-  const snapshot=useSyncExternalStore(subscribePresets,getPresets,getServerPresets);
-  const presets:StudyPreset[]=parsePresetLibrary(snapshot);
+  const snapshot = useSyncExternalStore(subscribePresets, readPresetsSnapshot, serverPresetsSnapshot);
+  const presets: StudyPreset[] = parsePresetLibrary(snapshot);
   const [message, setMessage] = useState("");
   const [storageAvailable, setStorageAvailable] = useState(true);
 
   function persist(items: StudyPreset[]) {
     try {
       window.localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(items));
-      window.dispatchEvent(new Event(PRESETS_CHANGED));
+      window.dispatchEvent(new Event(PRESETS_UPDATED_EVENT));
     } catch {
       setStorageAvailable(false);
       setMessage("Unable to save: browser storage is blocked or full.");
